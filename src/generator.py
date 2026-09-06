@@ -26,7 +26,15 @@ def build_static_site(routes: List[Dict[str, Any]], output_dir: Path) -> Path:
     with open(js_path, "r", encoding="utf-8") as f:
         js_content = f.read()
         
-    now = datetime.datetime.now()
+    # Время Пермского края (UTC+5 / Asia/Yekaterinburg)
+    try:
+        import zoneinfo
+        tz = zoneinfo.ZoneInfo("Asia/Yekaterinburg")
+        now = datetime.datetime.now(tz)
+    except Exception:
+        tz = datetime.timezone(datetime.timedelta(hours=5))
+        now = datetime.datetime.now(tz)
+
     now_str = now.strftime("%d.%m.%Y %H:%M")
     date_str = now.strftime("%d %B %Y").replace(
         "January", "января").replace("February", "февраля").replace(
