@@ -169,16 +169,44 @@
       themeToggleBtn.setAttribute('title', theme === 'dark' ? 'Включить дневную тему' : 'Включить ночную тему');
     }
 
-    // Blink headlights twice-thrice with 0.5s initial pause before turning on when entering dark mode
-    if (theme === 'dark' && animateHeadlights && busMascot) {
-      busMascot.classList.remove('headlights-blinking');
-      // Force reflow to re-trigger CSS keyframes
-      void busMascot.offsetWidth;
-      busMascot.classList.add('headlights-blinking');
-      setTimeout(() => {
-        if (busMascot) busMascot.classList.remove('headlights-blinking');
-      }, 1900);
+    // Manage recurring headlights blink in dark theme
+    if (theme === 'dark') {
+      if (animateHeadlights) {
+        triggerHeadlightsBlink();
+      }
+      scheduleNextHeadlightsBlink();
+    } else {
+      clearTimeout(headlightsTimer);
+      if (busMascot) busMascot.classList.remove('headlights-blinking');
     }
+  }
+
+  let headlightsTimer = null;
+
+  function triggerHeadlightsBlink() {
+    if (!busMascot) return;
+    busMascot.classList.remove('headlights-blinking');
+    void busMascot.offsetWidth; // force DOM reflow
+    busMascot.classList.add('headlights-blinking');
+    setTimeout(() => {
+      if (busMascot) busMascot.classList.remove('headlights-blinking');
+    }, 1900);
+  }
+
+  function scheduleNextHeadlightsBlink() {
+    clearTimeout(headlightsTimer);
+    const currentTheme = document.documentElement.getAttribute('data-theme');
+    if (currentTheme !== 'dark') return;
+
+    // Random delay: rnd * 60 seconds (min 8s, max 60s so it's lively and clearly visible)
+    const randomSec = Math.max(8, Math.round(Math.random() * 60));
+    headlightsTimer = setTimeout(() => {
+      const nowTheme = document.documentElement.getAttribute('data-theme');
+      if (nowTheme === 'dark') {
+        triggerHeadlightsBlink();
+        scheduleNextHeadlightsBlink(); // loop forever while in dark theme
+      }
+    }, randomSec * 1000);
   }
 
   function toggleTheme() {
