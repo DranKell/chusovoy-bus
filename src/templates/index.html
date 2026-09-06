@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  <title>Расписание автобусов г. Чусовой | Онлайн табло</title>
+  <meta name="description" content="Актуальное расписание движения автобусов Чусовского городского округа. Все городские и пригородные маршруты с онлайн определением ближайшего рейса.">
+  <meta name="theme-color" content="#1e3a8a">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🚌</text></svg>">
+  <style>
+    /* Inlined CSS styles will be inserted here during build */
+    {{INLINED_STYLE}}
+  </style>
+</head>
+<body>
+
+  <!-- Site Header -->
+  <header class="site-header">
+    <div class="container">
+      <div class="header-top">
+        <div class="brand-section">
+          <!-- Interactive Bus Mascot with Headlights -->
+          <div class="bus-mascot-wrapper" id="busMascot" title="Посигналить!">
+            <span class="honk-tooltip" id="honkTooltip">Би-бип! 📯</span>
+            <svg class="bus-svg" viewBox="0 0 120 70" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <!-- Headlight Ray Gradient -->
+                <linearGradient id="headlightRay" x1="0%" y1="50%" x2="100%" y2="50%">
+                  <stop offset="0%" stop-color="#fef08a" stop-opacity="0.85"/>
+                  <stop offset="60%" stop-color="#f59e0b" stop-opacity="0.3"/>
+                  <stop offset="100%" stop-color="#fbbf24" stop-opacity="0"/>
+                </linearGradient>
+                <filter id="glowFilter" x="-20%" y="-20%" width="140%" height="140%">
+                  <feGaussianBlur stdDeviation="3" result="blur" />
+                  <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                </filter>
+              </defs>
+
+              <!-- Projected Light Beam (Shown in Dark Mode) -->
+              <polygon class="bus-light-beam" points="106,38 150,15 150,65 106,46" fill="url(#headlightRay)" />
+
+              <!-- Bus Body Shadow -->
+              <ellipse cx="58" cy="62" rx="46" ry="4" fill="rgba(0,0,0,0.25)" />
+
+              <!-- Bus Main Chassis (Volgabus / PAZ livery) -->
+              <!-- White Aerodynamic Roof Cowl -->
+              <rect x="22" y="10" width="78" height="7" rx="3.5" fill="var(--bus-body-roof)" />
+              <rect x="14" y="15" width="94" height="42" rx="9" fill="var(--bus-body)" />
+              
+              <!-- Black Window Belt -->
+              <rect x="15" y="19" width="91" height="19" rx="3" fill="#0f141a" />
+
+              <!-- Bus Windows (Tinted glass) -->
+              <rect x="20" y="21" width="16" height="15" rx="2" fill="#2d3748" />
+              <rect x="40" y="21" width="16" height="15" rx="2" fill="#2d3748" />
+              <rect x="60" y="21" width="16" height="15" rx="2" fill="#2d3748" />
+              <path d="M80 21 H98 C101 21 103 23 104 27 L104 36 H80 V21 Z" fill="#3b485d" />
+
+              <!-- Characteristic Permian Geometric White Polygon Lines (Ливрея «Пермский период») -->
+              <path d="M42 38 L48 48 L56 42 L62 50 L52 56 L44 48 Z" stroke="rgba(255,255,255,0.45)" stroke-width="1.2" fill="none" />
+              <path d="M48 48 L52 56 M44 48 L36 54" stroke="rgba(255,255,255,0.35)" stroke-width="1" fill="none" />
+
+              <!-- Front Windshield & Headlight -->
+              <!-- Front Bumper -->
+              <rect x="10" y="47" width="6" height="6" rx="2" fill="var(--bus-bumper)" />
+              <rect x="105" y="46" width="5" height="8" rx="2" fill="var(--bus-bumper)" />
+
+              <!-- Headlight Lamp & Glowing Aura -->
+              <rect x="104" y="40" width="4" height="6" rx="2" fill="var(--headlight-lamp)" class="bus-lamp-glow" />
+              <!-- Rear Tail Light -->
+              <rect x="12" y="41" width="3" height="6" rx="1.5" fill="#ef4444" />
+
+              <!-- Wheels -->
+              <g>
+                <circle cx="34" cy="56" r="10" fill="var(--bus-wheel)" />
+                <circle cx="34" cy="56" r="5" fill="var(--bus-wheel-rim)" />
+                <circle cx="34" cy="56" r="2" fill="#fff" />
+              </g>
+              <g>
+                <circle cx="86" cy="56" r="10" fill="var(--bus-wheel)" />
+                <circle cx="86" cy="56" r="5" fill="var(--bus-wheel-rim)" />
+                <circle cx="86" cy="56" r="2" fill="#fff" />
+              </g>
+            </svg>
+          </div>
+
+          <div class="brand-text">
+            <h1>
+              Автобусы Чусовой
+              <a href="https://yandex.ru/maps/?text=%D0%9F%D0%B5%D1%80%D0%BC%D1%81%D0%BA%D0%B8%D0%B9+%D0%BA%D1%80%D0%B0%D0%B9" target="_blank" rel="noopener noreferrer" class="city-tag" title="Открыть Пермский край на Яндекс Картах">
+                Пермский край ↗
+              </a>
+            </h1>
+            <div class="brand-subtitle">
+              Городские и пригородные рейсы • Расписание движения
+            </div>
+          </div>
+        </div>
+
+        <div class="header-controls">
+          <button class="scheme-btn" id="openSchemeBtn" title="Схема движения автобусных маршрутов г. Чусовой">
+            🗺️ Схема маршрутов
+          </button>
+          <div class="live-clock" id="liveClock" title="Текущее время">
+            <span class="pulse-dot"></span> --:--
+          </div>
+          <button class="theme-toggle-btn" id="themeToggleBtn" aria-label="Переключить тему">
+            🌙
+          </button>
+        </div>
+      </div>
+
+      <!-- Realistic Bus LED Electronic General Info Display (Общее светодиодное табло без цифры) -->
+      <div class="led-display-casing" title="Информационное табло">
+        <div class="led-display-inner led-full-width">
+          <div class="led-ticker-window">
+            <div class="led-ticker-track" id="ledTickerText">
+              МУП «ЧУСОВСКОЕ АТП» • ПАССАЖИРСКИЕ ПЕРЕВОЗКИ ЧУСОВСКОГО ГОРОДСКОГО ОКРУГА • АДРЕС: Г. ЧУСОВОЙ, УЛ. ЮЖНАЯ, 10-А • ДИСПЕТЧЕР: +7 (34256) 5-15-40, 5-18-80 • СПРАВОЧНАЯ: +7 (34256) 4-22-25 • АКТУАЛЬНОЕ ОНЛАЙН-РАСПИСАНИЕ И ИНТЕРАКТИВНАЯ КАРТА МАРШРУТОВ • УДАЧНОЙ ДОРОГИ, СЧАСТЛИВОГО ПУТИ И ПРИЯТНЫХ ПОЕЗДОК!
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Toolbar: Search & Pills -->
+      <div class="toolbar-section">
+        <div class="search-wrapper">
+          <span class="search-icon">🔍</span>
+          <input 
+            type="text" 
+            class="search-input" 
+            id="searchInput" 
+            placeholder="Поиск по номеру, остановке или улице (напр. Горбольница, 13, Камасино, Мира)..."
+            autocomplete="off"
+            spellcheck="false"
+          >
+          <button class="clear-search-btn" id="clearSearchBtn" title="Очистить">✕</button>
+        </div>
+
+        <div class="filters-row">
+          <div class="pill-group">
+            <button class="pill-btn active" data-filter="all">Все маршруты</button>
+            <button class="pill-btn" data-filter="urban">Городские</button>
+            <button class="pill-btn" data-filter="suburban">Пригородные</button>
+            <button class="pill-btn" data-filter="today">Сегодня</button>
+            <button class="pill-btn" data-filter="fav">Избранное ★</button>
+          </div>
+
+          <div class="day-status-pill">
+            <span id="dayTypeIndicator">📅 {{BUILD_DATE}}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Grid Section -->
+  <main class="main-content">
+    <div class="container">
+      <div class="routes-grid" id="routesGrid">
+        <!-- Rendered by app.js -->
+      </div>
+    </div>
+  </main>
+
+  <!-- Modal Timetable Dialog -->
+  <div class="modal-backdrop" id="modalBackdrop" role="dialog" aria-modal="true">
+    <div class="modal-sheet">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <div class="modal-title-row">
+            <span class="modal-route-badge" id="modalRouteNum">№ --</span>
+            <h2 class="modal-route-name" id="modalRouteName">Название маршрута</h2>
+          </div>
+          <div class="modal-route-streets" id="modalRouteStreets"></div>
+        </div>
+        <button class="modal-close-btn" id="modalCloseBtn" aria-label="Закрыть">✕</button>
+      </div>
+
+      <!-- Route Electronic LED Destination Sign in Modal (Бегущая строка конкретного маршрута) -->
+      <div class="modal-led-wrapper">
+        <div class="led-display-casing modal-led-casing">
+          <div class="led-display-inner">
+            <div class="led-route-number" id="modalLedRouteNum">№ --</div>
+            <div class="led-ticker-window">
+              <div class="led-ticker-track" id="modalLedTickerText">
+                НАПРАВЛЕНИЕ ДВИЖЕНИЯ
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-highlight-banner" id="modalNextBanner" style="display:none;">
+        <!-- Next departure info -->
+      </div>
+
+      <div class="modal-tabs" id="modalTabs">
+        <!-- Direction / Day tabs -->
+      </div>
+
+      <div class="modal-body" id="modalTableContainer">
+        <!-- Table rendered by app.js -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Route Scheme Map Dialog with Live Interactive Bus Tracker -->
+  <div class="modal-backdrop" id="schemeModalBackdrop" role="dialog" aria-modal="true">
+    <div class="modal-sheet scheme-modal-sheet">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <div class="modal-title-row">
+            <h2 class="modal-route-name">Схема движения и онлайн радар автобусов</h2>
+            <span class="live-radar-badge"><span class="pulse-dot"></span> РАДАР ОНЛАЙН</span>
+          </div>
+          <div class="modal-route-streets">Расчетное теоретическое положение автобусов на линиях Чусового в реальном времени</div>
+        </div>
+        <button class="modal-close-btn" id="schemeCloseBtn" aria-label="Закрыть">✕</button>
+      </div>
+
+      <!-- Scheme Map Toolbar -->
+      <div class="scheme-toolbar">
+        <div class="scheme-legend">
+          <span class="legend-item"><span class="legend-dot running"></span> Автобус на линии</span>
+        </div>
+        <div class="scheme-controls">
+          <button class="pill-btn active" id="schemeFilterAll">Все на линии (<span id="activeBusesCount">0</span>)</button>
+          <button class="pill-btn" id="schemeZoomBtn">🔍 Масштаб 100% / Авто</button>
+        </div>
+      </div>
+
+      <div class="modal-body scheme-modal-body">
+        <div class="scheme-map-container" id="schemeMapContainer">
+          <img src="scheme_bus_routes.jpg" alt="Схема автобусных маршрутов г. Чусовой" class="scheme-image" id="schemeImage" loading="lazy">
+          <!-- SVG and HTML overlay layer for animated buses with headlights -->
+          <div class="buses-live-overlay" id="busesLiveOverlay"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="container">
+      <div>Расписание движения пассажирского транспорта Чусовского городского округа</div>
+      <div class="footer-links">
+        <span>Обновлено автоматически: {{BUILD_TIMESTAMP}}</span>
+        <span>•</span>
+        <a href="https://docs.google.com/spreadsheets/d/1nzePEfu6Vxki9aJG8i3t4kulrf1NXOnTrL1xPdPnIhk/htmlview" target="_blank" rel="noopener" class="footer-link">Google Таблица (Источник)</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Embedded Schedule Data -->
+  <script>
+    window.SCHEDULE_DATA = {{SCHEDULE_DATA_JSON}};
+  </script>
+
+  <!-- Inlined App Script -->
+  <script>
+    {{INLINED_SCRIPT}}
+  </script>
+</body>
+</html>
