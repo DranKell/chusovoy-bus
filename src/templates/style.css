@@ -208,11 +208,13 @@ body {
 
 /* Headlight Triple-Blink Animation on Dark Theme Activation (Pause 0.5s -> Blink 3 times -> Stay ON) */
 .bus-mascot-wrapper.headlights-blinking .bus-lamp-glow {
-  animation: busHeadlightsBlinkStage 1.8s ease-out forwards;
+  transition: none !important;
+  animation: busHeadlightsBlinkStage 1.8s ease-out forwards !important;
 }
 
 .bus-mascot-wrapper.headlights-blinking .bus-light-beam {
-  animation: busBeamBlinkStage 1.8s ease-out forwards;
+  transition: none !important;
+  animation: busBeamBlinkStage 1.8s ease-out forwards !important;
 }
 
 @keyframes busHeadlightsBlinkStage {
