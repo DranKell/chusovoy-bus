@@ -206,6 +206,35 @@ body {
   transition: opacity 0.6s ease;
 }
 
+/* Headlight Double-Blink Animation on Dark Theme Activation */
+.bus-mascot-wrapper.headlights-blinking .bus-lamp-glow {
+  animation: busHeadlightsFlicker 0.9s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.bus-mascot-wrapper.headlights-blinking .bus-light-beam {
+  animation: busBeamFlicker 0.9s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+@keyframes busHeadlightsFlicker {
+  0% { opacity: 0; filter: none; }
+  12% { opacity: 1; filter: drop-shadow(0 0 12px #fbbf24) drop-shadow(0 0 24px #f59e0b); }
+  25% { opacity: 0; filter: none; }
+  40% { opacity: 1; filter: drop-shadow(0 0 14px #fbbf24) drop-shadow(0 0 26px #f59e0b); }
+  55% { opacity: 0.15; filter: drop-shadow(0 0 4px #fbbf24); }
+  70% { opacity: 1; filter: drop-shadow(0 0 15px #fbbf24) drop-shadow(0 0 30px #f59e0b); }
+  100% { opacity: 1; filter: drop-shadow(0 0 10px #fbbf24) drop-shadow(0 0 20px #f59e0b); }
+}
+
+@keyframes busBeamFlicker {
+  0% { opacity: 0; }
+  12% { opacity: 0.85; }
+  25% { opacity: 0; }
+  40% { opacity: 0.95; }
+  55% { opacity: 0.1; }
+  70% { opacity: 0.92; }
+  100% { opacity: 0.92; }
+}
+
 /* Honk bubble */
 .honk-tooltip {
   position: absolute;

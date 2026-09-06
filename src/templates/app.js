@@ -161,19 +161,30 @@
     return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
   }
 
-  function applyTheme(theme) {
+  function applyTheme(theme, animateHeadlights = false) {
     document.documentElement.setAttribute('data-theme', theme);
     localStorage.setItem('bus_theme', theme);
     if (themeToggleBtn) {
       themeToggleBtn.innerHTML = theme === 'dark' ? '☀️' : '🌙';
       themeToggleBtn.setAttribute('title', theme === 'dark' ? 'Включить дневную тему' : 'Включить ночную тему');
     }
+
+    // Blink headlights twice before turning on when entering dark mode
+    if (theme === 'dark' && animateHeadlights && busMascot) {
+      busMascot.classList.remove('headlights-blinking');
+      // Force reflow to re-trigger CSS keyframes
+      void busMascot.offsetWidth;
+      busMascot.classList.add('headlights-blinking');
+      setTimeout(() => {
+        if (busMascot) busMascot.classList.remove('headlights-blinking');
+      }, 950);
+    }
   }
 
   function toggleTheme() {
     const current = document.documentElement.getAttribute('data-theme') || 'light';
     const next = current === 'dark' ? 'light' : 'dark';
-    applyTheme(next);
+    applyTheme(next, true);
   }
 
   // Sound / Mascot Easter Egg
