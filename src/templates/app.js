@@ -169,7 +169,7 @@
       themeToggleBtn.setAttribute('title', theme === 'dark' ? 'Включить дневную тему' : 'Включить ночную тему');
     }
 
-    // Blink headlights twice before turning on when entering dark mode
+    // Blink headlights twice-thrice with 0.5s initial pause before turning on when entering dark mode
     if (theme === 'dark' && animateHeadlights && busMascot) {
       busMascot.classList.remove('headlights-blinking');
       // Force reflow to re-trigger CSS keyframes
@@ -177,7 +177,7 @@
       busMascot.classList.add('headlights-blinking');
       setTimeout(() => {
         if (busMascot) busMascot.classList.remove('headlights-blinking');
-      }, 950);
+      }, 1900);
     }
   }
 
