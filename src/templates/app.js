@@ -670,10 +670,7 @@
       schemeImage.addEventListener('click', toggleSchemeZoom);
     }
 
-    const schemeZoomBtn = document.getElementById('schemeZoomBtn');
-    if (schemeZoomBtn) {
-      schemeZoomBtn.addEventListener('click', toggleSchemeZoom);
-    }
+
 
     // Modal Close
     if (modalCloseBtn) {
