@@ -959,7 +959,7 @@
         <button class="route-tile-btn ${activeClass} ${!hasTrack ? 'is-dev' : ''}" data-route="${r.number}" style="--tile-brand-color: ${color};">
           <div class="tile-top-row">
             <span class="tile-number" style="border-left: 3px solid ${color};">№${r.number}</span>
-            ${hasTrack ? '<span class="tile-live-count">✓ Готов</span>' : '<span class="tile-badge-dev">В разработке</span>'}
+            ${!hasTrack ? '<span class="tile-badge-dev">Собираем данные</span>' : ''}
           </div>
           <div class="tile-name">${r.name}</div>
         </button>
@@ -1177,7 +1177,7 @@
     if (!hasTrack) {
       schemeActiveRouteInfo.innerHTML = `
         <div class="active-route-info-card" style="border-left: 3px solid #64748b; padding-left: 0.5rem;">
-          <strong style="color: #94a3b8;">Маршрут №${selectedSchemeRoute} — В разработке</strong>
+          <strong style="color: #94a3b8;">Маршрут №${selectedSchemeRoute} — Собираем данные</strong>
           <span>Траектория движения в процессе выравнивания. Доступны маршруты: №3, №5, №6.</span>
         </div>
       `;
