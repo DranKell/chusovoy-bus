@@ -30,6 +30,8 @@
   const schemeActiveRouteInfo = document.getElementById('schemeActiveRouteInfo');
   const schemeFilterAllBtn = document.getElementById('schemeFilterAll');
   const schemeFilterNoneBtn = document.getElementById('schemeFilterNone');
+  const schemeFilterNorthBtn = document.getElementById('schemeFilterNorth');
+  const schemeFilterWestBtn = document.getElementById('schemeFilterWest');
 
   // Modal Elements
   const modalBackdrop = document.getElementById('modalBackdrop');
@@ -634,7 +636,7 @@
       });
     }
 
-    // Filter all / none toolbar buttons
+    // Filter all / none / branches toolbar buttons
     if (schemeFilterAllBtn) {
       schemeFilterAllBtn.addEventListener('click', () => {
         setSchemeActiveRoute('all');
@@ -643,6 +645,16 @@
     if (schemeFilterNoneBtn) {
       schemeFilterNoneBtn.addEventListener('click', () => {
         setSchemeActiveRoute('none');
+      });
+    }
+    if (schemeFilterNorthBtn) {
+      schemeFilterNorthBtn.addEventListener('click', () => {
+        setSchemeActiveRoute('branch_northern');
+      });
+    }
+    if (schemeFilterWestBtn) {
+      schemeFilterWestBtn.addEventListener('click', () => {
+        setSchemeActiveRoute('branch_western');
       });
     }
 
@@ -983,13 +995,23 @@
     if (schemeRouteTilesContainer) {
       const tileBtns = schemeRouteTilesContainer.querySelectorAll('.route-tile-btn');
       tileBtns.forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.route === routeNum);
+        if (routeNum === 'branch_northern') {
+          const isNorth = (REAL_TRACKS[btn.dataset.route] && REAL_TRACKS[btn.dataset.route].branch === 'northern');
+          btn.classList.toggle('active', Boolean(isNorth));
+        } else if (routeNum === 'branch_western') {
+          const isWest = (REAL_TRACKS[btn.dataset.route] && REAL_TRACKS[btn.dataset.route].branch === 'western');
+          btn.classList.toggle('active', Boolean(isWest));
+        } else {
+          btn.classList.toggle('active', btn.dataset.route === routeNum);
+        }
       });
     }
 
     // Update toolbar controls active states
     if (schemeFilterAllBtn) schemeFilterAllBtn.classList.toggle('active', routeNum === 'all');
     if (schemeFilterNoneBtn) schemeFilterNoneBtn.classList.toggle('active', routeNum === 'none');
+    if (schemeFilterNorthBtn) schemeFilterNorthBtn.classList.toggle('active', routeNum === 'branch_northern');
+    if (schemeFilterWestBtn) schemeFilterWestBtn.classList.toggle('active', routeNum === 'branch_western');
 
     updateActiveRouteSummary();
     drawRouteOnMap(routeNum);
@@ -1009,39 +1031,56 @@
       stopMarkersGroup.clearLayers();
     }
 
-    if (routeNum === 'none' || routeNum === 'all') {
+    if (routeNum === 'none') {
       return;
     }
 
-    const trackData = REAL_TRACKS[routeNum];
-    if (!trackData || !trackData.points || !trackData.points.length) {
-      return;
+    // Determine which routes to draw
+    let routesToDraw = [];
+    if (routeNum === 'all') {
+      routesToDraw = Object.keys(REAL_TRACKS);
+    } else if (routeNum === 'branch_northern') {
+      routesToDraw = Object.keys(REAL_TRACKS).filter(k => REAL_TRACKS[k].branch === 'northern');
+    } else if (routeNum === 'branch_western') {
+      routesToDraw = Object.keys(REAL_TRACKS).filter(k => REAL_TRACKS[k].branch === 'western');
+    } else if (REAL_TRACKS[routeNum]) {
+      routesToDraw = [routeNum];
     }
 
-    const color = trackData.color || ROUTE_BRAND_COLORS[routeNum] || '#f59e0b';
+    if (routesToDraw.length === 0) return;
 
-    // Outer glow line
-    const glowLine = L.polyline(trackData.points, {
-      color: color,
-      weight: 9,
-      opacity: 0.35,
-      lineCap: 'round',
-      lineJoin: 'round'
+    const layers = [];
+    routesToDraw.forEach(rKey => {
+      const trackData = REAL_TRACKS[rKey];
+      if (!trackData || !trackData.points || !trackData.points.length) return;
+
+      const color = trackData.color || ROUTE_BRAND_COLORS[rKey] || '#f59e0b';
+
+      // Outer glow line
+      const glowLine = L.polyline(trackData.points, {
+        color: color,
+        weight: 9,
+        opacity: 0.35,
+        lineCap: 'round',
+        lineJoin: 'round'
+      });
+
+      // Main sharp line
+      const mainLine = L.polyline(trackData.points, {
+        color: color,
+        weight: 5,
+        opacity: 0.95,
+        lineCap: 'round',
+        lineJoin: 'round'
+      });
+
+      layers.push(glowLine, mainLine);
     });
 
-    // Main sharp line
-    const mainLine = L.polyline(trackData.points, {
-      color: color,
-      weight: 5,
-      opacity: 0.95,
-      lineCap: 'round',
-      lineJoin: 'round'
-    });
-
-    activeTrackPolyline = L.featureGroup([glowLine, mainLine]).addTo(leafletMap);
-
-    // Fit map bounds to show route nicely
-    leafletMap.fitBounds(mainLine.getBounds(), { padding: [40, 40], maxZoom: 15 });
+    if (layers.length > 0) {
+      activeTrackPolyline = L.featureGroup(layers).addTo(leafletMap);
+      leafletMap.fitBounds(activeTrackPolyline.getBounds(), { padding: [40, 40], maxZoom: 15 });
+    }
 
     // Known stops coordinates for plotting on map
     const KNOWN_STOPS_GEO = {
@@ -1111,7 +1150,27 @@
     }
 
     if (selectedSchemeRoute === 'all') {
-      schemeActiveRouteInfo.innerHTML = '<div class="active-route-info-card"><strong>Все городские маршруты</strong><span>Выберите конкретный маршрут для просмотра точной трассы</span></div>';
+      schemeActiveRouteInfo.innerHTML = '<div class="active-route-info-card"><strong>Все городские маршруты</strong><span>Отображаются все активные маршруты Чусового</span></div>';
+      return;
+    }
+
+    if (selectedSchemeRoute === 'branch_northern') {
+      schemeActiveRouteInfo.innerHTML = `
+        <div class="active-route-info-card" style="border-left: 3px solid #f59e0b; padding-left: 0.5rem;">
+          <strong style="color: #f59e0b;">🧭 Северная ветка (Архиповка / Вокзал / Такман)</strong>
+          <span>Маршруты, идущие на север вдоль железнодорожного коридора через ДКЖ и Вокзал (№6, №4, №10, №22).</span>
+        </div>
+      `;
+      return;
+    }
+
+    if (selectedSchemeRoute === 'branch_western') {
+      schemeActiveRouteInfo.innerHTML = `
+        <div class="active-route-info-card" style="border-left: 3px solid #0284c7; padding-left: 0.5rem;">
+          <strong style="color: #0284c7;">🧭 Западная ветка (Горбольница / Сплавщиков / Старый город)</strong>
+          <span>Маршруты, идущие на запад вдоль русла Чусовой в Старый город к Горбольнице, РМЗ и Сплавщиков (№3, №5, №7, №9).</span>
+        </div>
+      `;
       return;
     }
 
@@ -1122,7 +1181,7 @@
       schemeActiveRouteInfo.innerHTML = `
         <div class="active-route-info-card" style="border-left: 3px solid #64748b; padding-left: 0.5rem;">
           <strong style="color: #94a3b8;">Маршрут №${selectedSchemeRoute} — В разработке</strong>
-          <span>Траектория движения в процессе выравнивания. Доступны маршруты: №6, №5.</span>
+          <span>Траектория движения в процессе выравнивания. Доступны маршруты: №3, №5, №6.</span>
         </div>
       `;
       return;
@@ -1194,8 +1253,8 @@
     activeBusMarkers.forEach(m => leafletMap.removeLayer(m));
     activeBusMarkers = [];
 
-    // If 'none' or route without track, don't show buses
-    if (selectedSchemeRoute === 'none' || (selectedSchemeRoute !== 'all' && !REAL_TRACKS[selectedSchemeRoute])) {
+    // If 'none', don't show buses
+    if (selectedSchemeRoute === 'none') {
       return;
     }
 
@@ -1203,7 +1262,18 @@
     const nowMinutes = now.getHours() * 60 + now.getMinutes() + now.getSeconds() / 60;
     const weekendToday = isWeekend(now);
 
-    const routesToCheck = (selectedSchemeRoute === 'all') ? Object.keys(REAL_TRACKS) : [selectedSchemeRoute];
+    let routesToCheck = [];
+    if (selectedSchemeRoute === 'all') {
+      routesToCheck = Object.keys(REAL_TRACKS);
+    } else if (selectedSchemeRoute === 'branch_northern') {
+      routesToCheck = Object.keys(REAL_TRACKS).filter(k => REAL_TRACKS[k].branch === 'northern');
+    } else if (selectedSchemeRoute === 'branch_western') {
+      routesToCheck = Object.keys(REAL_TRACKS).filter(k => REAL_TRACKS[k].branch === 'western');
+    } else if (REAL_TRACKS[selectedSchemeRoute]) {
+      routesToCheck = [selectedSchemeRoute];
+    } else {
+      return;
+    }
 
     routesToCheck.forEach(rNum => {
       const trackData = REAL_TRACKS[rNum];
