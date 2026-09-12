@@ -1107,31 +1107,26 @@
       "Севастопольская": [58.2715321, 57.8341574]
     };
 
-    // Route-specific intermediate and terminal stops
-    const ROUTE_STOPS_LIST = {
-      "3": ["Школа №13", "ул.Мира", "пл.ЧМЗ", "Поликлиника", "Горбольница", "Ветеран", "Юность", "Юбилейный"],
-      "5": ["Школа №13", "ул.Мира", "пл.ЧМЗ", "ул.Сплавщиков", "Ветеран", "Юность", "Юбилейный"],
-      "6": ["Школа №13", "ул.Мира", "пл.ЧМЗ", "ж/д вокзал", "п.Архиповка", "Ветеран", "Юность", "Юбилейный"],
-      "7": ["пл.Металлургов", "пл.ЧМЗ", "Поликлиника", "ул.Революционная", "ул.Севастопольская", "пл.Металлургов"],
-      "9": ["ул.Коммунистическая", "ул.Мира", "пл.ЧМЗ", "Поликлиника", "Горбольница", "ул.Коммунистическая"],
-      "10": ["ул.Коммунистическая", "ул.Мира", "пл.ЧМЗ", "ж/д вокзал", "п.Архиповка", "ул.Коммунистическая"],
-      "11": ["Школа №13", "ул.Коммунистическая", "ул.Мира", "Юность", "Школа №13"],
-      "15": ["ул.Севастопольская", "Школа №13", "ул.Коммунистическая", "Юность", "ул.Севастопольская"]
+    // Terminal stops for each route (initial and turnaround/destination)
+    const ROUTE_TERMINAL_STOPS = {
+      "3": ["Школа №13", "Горбольница"],
+      "5": ["Школа №13", "ул.Сплавщиков"],
+      "6": ["Школа №13", "п.Архиповка"],
+      "7": ["пл.Металлургов", "ул.Революционная"],
+      "9": ["ул.Коммунистическая", "Горбольница"],
+      "10": ["ул.Коммунистическая", "п.Архиповка"],
+      "11": ["Школа №13", "ул.Коммунистическая"],
+      "15": ["ул.Севастопольская", "ул.Коммунистическая"]
     };
 
-    const routeStops = ROUTE_STOPS_LIST[routeNum] || [trackData.name.split('—')[0].trim(), trackData.name.split('—')[1]?.trim()].filter(Boolean);
+    const terminalStops = ROUTE_TERMINAL_STOPS[routeNum] || [trackData.name.split('—')[0]?.trim(), trackData.name.split('—')[1]?.trim()].filter(Boolean);
 
-    routeStops.forEach((sName, sIdx) => {
+    terminalStops.forEach((sName, sIdx) => {
       const coord = KNOWN_STOPS_GEO[sName];
       if (!coord) return;
 
       const isFirst = (sIdx === 0);
-      const isLast = (sIdx === routeStops.length - 1);
-      const isTerminal = isFirst || isLast;
-
-      // Uniform distinct styling for ALL stops:
-      // Inner core + outer glowing aura
-      const pinColor = isFirst ? '#10b981' : (isLast ? '#ef4444' : '#f59e0b');
+      const pinColor = isFirst ? '#10b981' : '#ef4444';
       const pinHtml = `<div class="leaflet-stop-dot highlight" style="background:${pinColor}; border-color:#ffffff; box-shadow:0 0 9px ${pinColor}; width:13px; height:13px; border-radius:50%; border:2.5px solid #fff;" title="Остановка: ${sName}"></div>`;
 
       const icon = L.divIcon({
@@ -1142,7 +1137,7 @@
       });
 
       L.marker(coord, { icon: icon })
-        .bindTooltip(`<b>Остановка: ${sName}</b>${isTerminal ? ` <small style="color:${pinColor};">(${isFirst ? 'Начальная' : 'Конечная'})</small>` : ''}`, { direction: 'top' })
+        .bindTooltip(`<b>Остановка: ${sName}</b> <small style="color:${pinColor};">(${isFirst ? 'Начальная' : 'Конечная'})</small>`, { direction: 'top' })
         .addTo(stopMarkersGroup);
     });
   }
