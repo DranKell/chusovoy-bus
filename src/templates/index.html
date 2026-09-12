@@ -230,18 +230,39 @@
       <div class="scheme-toolbar">
         <div class="scheme-legend">
           <span class="legend-item"><span class="legend-dot running"></span> Автобус на линии</span>
+          <span class="legend-hint">Выберите маршрут справа для просмотра его движения</span>
         </div>
         <div class="scheme-controls">
-          <button class="pill-btn active" id="schemeFilterAll">Все на линии (<span id="activeBusesCount">0</span>)</button>
+          <button class="pill-btn active" id="schemeFilterAll" data-route="all">Показать все</button>
+          <button class="pill-btn" id="schemeFilterNone" data-route="none">Очистить карту</button>
           <button class="pill-btn" id="schemeZoomBtn">🔍 Масштаб 100% / Авто</button>
         </div>
       </div>
 
       <div class="modal-body scheme-modal-body">
-        <div class="scheme-map-container" id="schemeMapContainer">
-          <img src="scheme_bus_routes.jpg" alt="Схема автобусных маршрутов г. Чусовой" class="scheme-image" id="schemeImage" loading="lazy">
-          <!-- SVG and HTML overlay layer for animated buses with headlights -->
-          <div class="buses-live-overlay" id="busesLiveOverlay"></div>
+        <div class="scheme-layout">
+          <!-- Left: Map area -->
+          <div class="scheme-map-viewport">
+            <div class="scheme-map-container" id="schemeMapContainer">
+              <img src="scheme_bus_routes.jpg" alt="Схема автобусных маршрутов г. Чусовой" class="scheme-image" id="schemeImage" loading="lazy">
+              <!-- SVG and HTML overlay layer for animated buses with headlights -->
+              <div class="buses-live-overlay" id="busesLiveOverlay"></div>
+            </div>
+          </div>
+
+          <!-- Right: Route Tiles Sidebar -->
+          <aside class="scheme-sidebar">
+            <div class="scheme-sidebar-header">
+              <div class="sidebar-title">Городские маршруты</div>
+              <div class="sidebar-subtitle">Нажмите на плитку, чтобы отслеживать</div>
+            </div>
+            <div class="scheme-tiles-grid" id="schemeRouteTiles">
+              <!-- Rendered dynamically by app.js: tiles for 1, 3, 4, 5, 6, 7, 9, 10, 11, 12, 15, 16, 17, 22 -->
+            </div>
+            <div class="scheme-sidebar-footer" id="schemeActiveRouteInfo">
+              <div class="active-route-info-empty">Маршрут не выбран. Карта чистая.</div>
+            </div>
+          </aside>
         </div>
       </div>
     </div>

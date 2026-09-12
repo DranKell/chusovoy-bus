@@ -13,6 +13,7 @@
   let searchQuery = '';
   let activeModalRoute = null;
   let activeModalSectionIdx = 0;
+  let selectedSchemeRoute = 'none'; // 'none' (clean map), 'all', or specific route number like '3', '6'
 
   // DOM Elements
   const routesGrid = document.getElementById('routesGrid');
@@ -23,6 +24,12 @@
   const liveClockEl = document.getElementById('liveClock');
   const busMascot = document.getElementById('busMascot');
   const honkTooltip = document.getElementById('honkTooltip');
+
+  // Scheme Modal Elements
+  const schemeRouteTilesContainer = document.getElementById('schemeRouteTiles');
+  const schemeActiveRouteInfo = document.getElementById('schemeActiveRouteInfo');
+  const schemeFilterAllBtn = document.getElementById('schemeFilterAll');
+  const schemeFilterNoneBtn = document.getElementById('schemeFilterNone');
 
   // Modal Elements
   const modalBackdrop = document.getElementById('modalBackdrop');
@@ -586,6 +593,8 @@
       if (schemeModalBackdrop) {
         schemeModalBackdrop.classList.add('open');
         document.body.style.overflow = 'hidden';
+        renderSchemeRouteTiles();
+        updateLiveMapRadar();
       }
     }
 
@@ -613,6 +622,19 @@
         if (e.target === schemeModalBackdrop) closeSchemeModal();
       });
     }
+
+    // Filter all / none toolbar buttons
+    if (schemeFilterAllBtn) {
+      schemeFilterAllBtn.addEventListener('click', () => {
+        setSchemeActiveRoute('all');
+      });
+    }
+    if (schemeFilterNoneBtn) {
+      schemeFilterNoneBtn.addEventListener('click', () => {
+        setSchemeActiveRoute('none');
+      });
+    }
+
     const schemeMapContainer = document.getElementById('schemeMapContainer');
 
     function toggleSchemeZoom() {
@@ -858,11 +880,103 @@
     return { x: last.x, y: last.y, angle: 0 };
   }
 
+  // Render right sidebar route selection tiles
+  function renderSchemeRouteTiles() {
+    if (!schemeRouteTilesContainer) return;
+
+    // Filter urban routes only
+    const urbanRoutes = allRoutes.filter(r => r.category !== 'suburban');
+
+    let html = '';
+    urbanRoutes.forEach(r => {
+      const isSelected = (selectedSchemeRoute === r.number);
+      const activeClass = isSelected ? 'active' : '';
+
+      html += `
+        <button class="route-tile-btn ${activeClass}" data-route="${r.number}">
+          <div class="tile-top-row">
+            <span class="tile-number">№${r.number}</span>
+            <span class="tile-live-count" id="tileCount-${r.number}"></span>
+          </div>
+          <div class="tile-name">${r.name}</div>
+        </button>
+      `;
+    });
+
+    schemeRouteTilesContainer.innerHTML = html;
+
+    // Attach click events to tiles
+    const tileBtns = schemeRouteTilesContainer.querySelectorAll('.route-tile-btn');
+    tileBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const routeNum = btn.dataset.route;
+        if (selectedSchemeRoute === routeNum) {
+          // Toggle off: set to none (clean map)
+          setSchemeActiveRoute('none');
+        } else {
+          setSchemeActiveRoute(routeNum);
+        }
+      });
+    });
+
+    updateActiveRouteSummary();
+  }
+
+  // Change selected scheme route
+  function setSchemeActiveRoute(routeNum) {
+    selectedSchemeRoute = routeNum;
+
+    // Update tile button active states
+    if (schemeRouteTilesContainer) {
+      const tileBtns = schemeRouteTilesContainer.querySelectorAll('.route-tile-btn');
+      tileBtns.forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.route === routeNum);
+      });
+    }
+
+    // Update toolbar controls active states
+    if (schemeFilterAllBtn) schemeFilterAllBtn.classList.toggle('active', routeNum === 'all');
+    if (schemeFilterNoneBtn) schemeFilterNoneBtn.classList.toggle('active', routeNum === 'none');
+
+    updateActiveRouteSummary();
+    updateLiveMapRadar();
+  }
+
+  // Update active route description in sidebar footer
+  function updateActiveRouteSummary() {
+    if (!schemeActiveRouteInfo) return;
+
+    if (selectedSchemeRoute === 'none') {
+      schemeActiveRouteInfo.innerHTML = '<div class="active-route-info-empty">Маршрут не выбран. Карта чистая.</div>';
+      return;
+    }
+
+    if (selectedSchemeRoute === 'all') {
+      schemeActiveRouteInfo.innerHTML = '<div class="active-route-info-card"><strong>Все городские маршруты</strong><span>Отображаются все активные машины на линиях</span></div>';
+      return;
+    }
+
+    const route = allRoutes.find(r => r.number === selectedSchemeRoute);
+    if (route) {
+      schemeActiveRouteInfo.innerHTML = `
+        <div class="active-route-info-card">
+          <strong>№${route.number} ${route.name}</strong>
+          ${route.streets ? `<span>Через: ${route.streets}</span>` : ''}
+        </div>
+      `;
+    }
+  }
+
   // Calculate current live bus positions based on schedule
   function updateLiveMapRadar() {
     const overlay = document.getElementById('busesLiveOverlay');
-    const countBadge = document.getElementById('activeBusesCount');
     if (!overlay || !allRoutes.length) return;
+
+    // If 'none' selected, clear map and return
+    if (selectedSchemeRoute === 'none') {
+      overlay.innerHTML = '';
+      return;
+    }
 
     const now = getNow();
     const nowMinutes = now.getHours() * 60 + now.getMinutes() + now.getSeconds() / 60;
@@ -873,6 +987,11 @@
     allRoutes.forEach(route => {
       // На интерактивной схеме города показываем только городские автобусы
       if (route.category === 'suburban') return;
+
+      // Filter: if specific route is selected, skip all others!
+      if (selectedSchemeRoute !== 'all' && selectedSchemeRoute !== route.number) {
+        return;
+      }
 
       route.sections.forEach(sec => {
         if (sec.type === 'weekday' && weekendToday) return;
