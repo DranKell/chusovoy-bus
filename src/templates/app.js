@@ -1106,7 +1106,8 @@
       "3": ["Школа №13", "ул.Мира", "пл.ЧМЗ", "Поликлиника", "Горбольница", "Ветеран", "Юность", "Юбилейный"],
       "5": ["Школа №13", "ул.Мира", "пл.ЧМЗ", "ул.Сплавщиков", "Ветеран", "Юность", "Юбилейный"],
       "6": ["Школа №13", "ул.Мира", "пл.ЧМЗ", "ж/д вокзал", "п.Архиповка", "Ветеран", "Юность", "Юбилейный"],
-      "9": ["ул.Коммунистическая", "ул.Мира", "пл.ЧМЗ", "Поликлиника", "Горбольница", "ул.Коммунистическая"]
+      "9": ["ул.Коммунистическая", "ул.Мира", "пл.ЧМЗ", "Поликлиника", "Горбольница", "ул.Коммунистическая"],
+      "10": ["ул.Коммунистическая", "ул.Мира", "пл.ЧМЗ", "ж/д вокзал", "п.Архиповка", "ул.Коммунистическая"]
     };
 
     const routeStops = ROUTE_STOPS_LIST[routeNum] || [trackData.name.split('—')[0].trim(), trackData.name.split('—')[1]?.trim()].filter(Boolean);
@@ -1115,25 +1116,24 @@
       const coord = KNOWN_STOPS_GEO[sName];
       if (!coord) return;
 
-      const isTerminal = sIdx === 0 || sIdx === routeStops.length - 1;
+      const isFirst = (sIdx === 0);
+      const isLast = (sIdx === routeStops.length - 1);
+      const isTerminal = isFirst || isLast;
 
-      let pinHtml = '';
-      if (isTerminal) {
-        pinHtml = `<div style="background:${sIdx === 0 ? '#10b981' : '#ef4444'}; width:14px; height:14px; border-radius:50%; border:2px solid #fff; box-shadow:0 0 8px rgba(0,0,0,0.5);"></div>`;
-      } else {
-        // All intermediate stops share uniform distinct highlighted style
-        pinHtml = `<div class="leaflet-stop-dot highlight" title="Остановка: ${sName}"></div>`;
-      }
+      // Uniform distinct styling for ALL stops:
+      // Inner core + outer glowing aura
+      const pinColor = isFirst ? '#10b981' : (isLast ? '#ef4444' : '#f59e0b');
+      const pinHtml = `<div class="leaflet-stop-dot highlight" style="background:${pinColor}; border-color:#ffffff; box-shadow:0 0 9px ${pinColor}; width:13px; height:13px; border-radius:50%; border:2.5px solid #fff;" title="Остановка: ${sName}"></div>`;
 
       const icon = L.divIcon({
         className: 'leaflet-stop-pin',
         html: pinHtml,
-        iconSize: isTerminal ? [14, 14] : [12, 12],
-        iconAnchor: isTerminal ? [7, 7] : [6, 6]
+        iconSize: [14, 14],
+        iconAnchor: [7, 7]
       });
 
       L.marker(coord, { icon: icon })
-        .bindTooltip(`<b>Остановка: ${sName}</b>`, { direction: 'top' })
+        .bindTooltip(`<b>Остановка: ${sName}</b>${isTerminal ? ` <small style="color:${pinColor};">(${isFirst ? 'Начальная' : 'Конечная'})</small>` : ''}`, { direction: 'top' })
         .addTo(stopMarkersGroup);
     });
   }
@@ -1179,7 +1179,7 @@
       schemeActiveRouteInfo.innerHTML = `
         <div class="active-route-info-card" style="border-left: 3px solid #64748b; padding-left: 0.5rem;">
           <strong style="color: #94a3b8;">Маршрут №${selectedSchemeRoute} — Собираем данные</strong>
-          <span>Траектория движения в процессе выравнивания. Доступны маршруты: №3, №5, №6, №9.</span>
+          <span>Траектория движения в процессе выравнивания. Доступны маршруты: №3, №5, №6, №9, №10.</span>
         </div>
       `;
       return;
