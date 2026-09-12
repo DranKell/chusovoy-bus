@@ -923,10 +923,10 @@
       attributionControl: false
     });
 
-    // Dark-styled OpenStreetMap / CartoDB tiles
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+    // Standard free OpenStreetMap tiles (100% free, no API key required)
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
-      subdomains: 'abcd'
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
     }).addTo(leafletMap);
 
     stopMarkersGroup = L.layerGroup().addTo(leafletMap);
