@@ -1349,13 +1349,12 @@
 
             if (nowMinutes >= startInMin && nowMinutes <= endInMin) {
               const rawProgress = (nowMinutes - startInMin) / (endInMin - startInMin);
-              // Reverse progress along polyline: goes from 1.0 down to 0.0
               activeBuses.push({
                 direction: 'inbound',
                 dest: firstStop,
                 origin: lastStop,
                 tStart: tInObj.time,
-                progress: Math.max(0.02, Math.min(0.98, 1.0 - rawProgress)),
+                progress: Math.max(0.02, Math.min(0.98, rawProgress)),
                 isLive: true
               });
             } else {
@@ -1367,7 +1366,7 @@
                   dest: firstStop,
                   origin: lastStop,
                   tStart: tInObj.time,
-                  progress: 0.72,
+                  progress: 0.55,
                   isLive: false
                 };
               }
@@ -1382,13 +1381,26 @@
           if (nearestInbound) busesToShow.push(nearestInbound);
         }
 
+        // Split indices for each route: where outbound ends (terminal) and inbound starts
+        const ROUTE_TERMINAL_SPLIT = {
+          "3": 63,
+          "5": 69,
+          "6": 56,
+          "9": 87,
+          "10": 81
+        };
+
+        const splitIdx = ROUTE_TERMINAL_SPLIT[rNum] || Math.floor(trackData.points.length / 2);
+        const outboundPts = trackData.points.slice(0, splitIdx + 1);
+        const inboundPts = trackData.points.slice(splitIdx);
+
         busesToShow.forEach(({ direction, dest, origin, tStart, progress, isLive }) => {
-          const busPos = interpolateLeafletPolyline(trackData.points, progress);
+          // Use outbound segment for outbound trips, and inbound return segment for inbound trips!
+          const targetPts = (direction === 'inbound' && inboundPts.length >= 2) ? inboundPts : outboundPts;
+          const busPos = interpolateLeafletPolyline(targetPts, progress);
           if (busPos) {
             const busColor = trackData.color || ROUTE_BRAND_COLORS[rNum] || '#f59e0b';
-            // Inbound bus moves backwards along polyline, so flip angle by 180 deg
-            const angleOffset = direction === 'inbound' ? 90 : -90;
-            const headingAngle = busPos.angle + angleOffset;
+            const headingAngle = busPos.angle - 90;
             const dirArrow = direction === 'inbound' ? '◀' : '▶';
 
             const iconHtml = `
