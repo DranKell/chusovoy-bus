@@ -1191,49 +1191,116 @@
         const stops = sec.stops;
         if (!stops || stops.length < 2) return;
 
-        // Find currently active trips, or pick the nearest trip
-        let activeTrips = [];
-        let nearestTrip = null;
-        let minDiff = Infinity;
+        // Two endpoints of the route
+        const firstStop = stops[0];
+        const lastStop = stops[stops.length - 1];
+
+        // Search for currently active buses in both directions (Outbound: firstStop -> lastStop, Inbound: lastStop -> firstStop)
+        let activeBuses = [];
+        let nearestOutbound = null;
+        let nearestInbound = null;
+        let minDiffOut = Infinity;
+        let minDiffIn = Infinity;
 
         sec.schedule.forEach(trip => {
-          let startMin = null;
-          let tStart = null;
-          for (let s of stops) {
-            if (trip[s] && trip[s].time) {
-              tStart = trip[s].time;
-              const [h, m] = tStart.split(':').map(Number);
-              startMin = h * 60 + m;
-              break;
+          // Outbound: starts from firstStop
+          const tOutObj = trip[firstStop];
+          if (tOutObj && tOutObj.time) {
+            const [h, m] = tOutObj.time.split(':').map(Number);
+            const startOutMin = h * 60 + m;
+            let endOutMin = startOutMin + 26; // default 26 min trip
+
+            // If arrival time at lastStop is specified, use exact time
+            const tEndObj = trip[lastStop];
+            if (tEndObj && tEndObj.time) {
+              const [eh, em] = tEndObj.time.split(':').map(Number);
+              const exactEnd = eh * 60 + em;
+              if (exactEnd > startOutMin) endOutMin = exactEnd;
+            }
+
+            if (nowMinutes >= startOutMin && nowMinutes <= endOutMin) {
+              const rawProgress = (nowMinutes - startOutMin) / (endOutMin - startOutMin);
+              activeBuses.push({
+                direction: 'outbound',
+                dest: lastStop,
+                origin: firstStop,
+                tStart: tOutObj.time,
+                progress: Math.max(0.02, Math.min(0.98, rawProgress)),
+                isLive: true
+              });
+            } else {
+              const diff = Math.abs(nowMinutes - startOutMin);
+              if (diff < minDiffOut) {
+                minDiffOut = diff;
+                nearestOutbound = {
+                  direction: 'outbound',
+                  dest: lastStop,
+                  origin: firstStop,
+                  tStart: tOutObj.time,
+                  progress: 0.28,
+                  isLive: false
+                };
+              }
             }
           }
 
-          if (startMin === null) return;
-          const endMin = startMin + 28; // average route run duration ~28 mins
+          // Inbound: starts from lastStop
+          const tInObj = trip[lastStop];
+          if (tInObj && tInObj.time) {
+            const [h, m] = tInObj.time.split(':').map(Number);
+            const startInMin = h * 60 + m;
+            const endInMin = startInMin + 26;
 
-          if (nowMinutes >= startMin && nowMinutes <= endMin) {
-            const progress = (nowMinutes - startMin) / (endMin - startMin);
-            activeTrips.push({ trip, tStart, progress, isLive: true });
-          } else {
-            const diff = Math.abs(nowMinutes - startMin);
-            if (diff < minDiff) {
-              minDiff = diff;
-              nearestTrip = { trip, tStart, progress: 0.35, isLive: false };
+            if (nowMinutes >= startInMin && nowMinutes <= endInMin) {
+              const rawProgress = (nowMinutes - startInMin) / (endInMin - startInMin);
+              // Reverse progress along polyline: goes from 1.0 down to 0.0
+              activeBuses.push({
+                direction: 'inbound',
+                dest: firstStop,
+                origin: lastStop,
+                tStart: tInObj.time,
+                progress: Math.max(0.02, Math.min(0.98, 1.0 - rawProgress)),
+                isLive: true
+              });
+            } else {
+              const diff = Math.abs(nowMinutes - startInMin);
+              if (diff < minDiffIn) {
+                minDiffIn = diff;
+                nearestInbound = {
+                  direction: 'inbound',
+                  dest: firstStop,
+                  origin: lastStop,
+                  tStart: tInObj.time,
+                  progress: 0.72,
+                  isLive: false
+                };
+              }
             }
           }
         });
 
-        // If buses are active right now, show them; otherwise display the nearest bus on track
-        const tripsToShow = activeTrips.length > 0 ? activeTrips : (nearestTrip ? [nearestTrip] : []);
+        // Determine buses to show: active ones, or show 2 demonstration buses (outbound + inbound) if off-peak
+        let busesToShow = activeBuses;
+        if (busesToShow.length === 0) {
+          if (nearestOutbound) busesToShow.push(nearestOutbound);
+          if (nearestInbound) busesToShow.push(nearestInbound);
+        }
 
-        tripsToShow.forEach(({ tStart, progress, isLive }) => {
+        busesToShow.forEach(({ direction, dest, origin, tStart, progress, isLive }) => {
           const busPos = interpolateLeafletPolyline(trackData.points, progress);
           if (busPos) {
             const busColor = trackData.color || ROUTE_BRAND_COLORS[rNum] || '#f59e0b';
+            // Inbound bus moves backwards along polyline, so flip angle by 180 deg
+            const angleOffset = direction === 'inbound' ? 90 : -90;
+            const headingAngle = busPos.angle + angleOffset;
+            const dirArrow = direction === 'inbound' ? '◀' : '▶';
+
             const iconHtml = `
               <div class="leaflet-bus-marker-wrap">
-                <div class="leaflet-bus-badge" style="background: ${busColor};">№ ${rNum}</div>
-                <div class="leaflet-bus-svg-wrap" style="transform: rotate(${busPos.angle - 90}deg);">
+                <div class="leaflet-bus-badge" style="background: ${busColor}; font-weight:800;">
+                  № ${rNum} ${dirArrow}
+                </div>
+                <div class="leaflet-bus-svg-wrap" style="transform: rotate(${headingAngle}deg);">
                   <svg width="34" height="22" viewBox="0 0 50 30" fill="none">
                     <rect x="4" y="5" width="40" height="20" rx="4" fill="${busColor}" stroke="#fff" stroke-width="2" />
                     <rect x="10" y="3" width="28" height="4" rx="1.5" fill="#ffffff" />
@@ -1247,12 +1314,16 @@
             const busIcon = L.divIcon({
               className: 'leaflet-bus-icon',
               html: iconHtml,
-              iconSize: [44, 44],
-              iconAnchor: [22, 22]
+              iconSize: [46, 46],
+              iconAnchor: [23, 23]
             });
 
             const marker = L.marker([busPos.lat, busPos.lon], { icon: busIcon })
-              .bindTooltip(`<strong>Маршрут №${rNum}</strong><br>${isLive ? 'В рейсе • Отпр: ' + tStart : 'Плановый рейс: ' + tStart}`, { direction: 'top' })
+              .bindTooltip(`
+                <strong>Маршрут №${rNum} (${direction === 'outbound' ? 'Прямой' : 'Обратный'})</strong><br>
+                <span>Направление: ➔ <b>${dest}</b></span><br>
+                <small>${isLive ? '🟢 В рейсе • Отпр. в ' + tStart : '⏰ Плановый рейс: ' + tStart}</small>
+              `, { direction: 'top' })
               .addTo(leafletMap);
 
             activeBusMarkers.push(marker);
