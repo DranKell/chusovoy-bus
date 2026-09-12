@@ -652,14 +652,15 @@ body {
 }
 
 .route-tile-btn.active {
-  background: var(--accent-primary-light);
-  border-color: var(--accent-primary);
-  box-shadow: 0 0 0 2px rgba(217, 119, 6, 0.35);
+  background: var(--bg-surface-hover);
+  border-color: var(--tile-brand-color, var(--accent-primary));
+  box-shadow: 0 0 0 2px var(--tile-brand-color, var(--accent-primary));
 }
 
 .route-tile-btn.active .tile-number {
-  background: var(--accent-primary);
+  background: var(--tile-brand-color, var(--accent-primary));
   color: #ffffff;
+  border-color: var(--tile-brand-color, var(--accent-primary));
 }
 
 .tile-top-row {

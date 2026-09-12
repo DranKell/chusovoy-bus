@@ -71,11 +71,12 @@ def build_static_site(data_input: Any, output_dir: Path) -> Path:
     with open(out_file, "w", encoding="utf-8") as f:
         f.write(rendered)
 
-    # Copy scheme image to dist
-    scheme_src = TEMPLATES_DIR / "scheme_bus_routes.jpg"
-    if scheme_src.exists():
-        import shutil
-        shutil.copy2(scheme_src, output_dir / "scheme_bus_routes.jpg")
+    # Copy scheme vector and legacy image to dist
+    for asset_name in ["city_map.svg", "scheme_bus_routes.jpg"]:
+        asset_path = TEMPLATES_DIR / asset_name
+        if asset_path.exists():
+            import shutil
+            shutil.copy2(asset_path, output_dir / asset_name)
         
     # Also dump data.json for API / testing
     data_file = output_dir / "schedule.json"
