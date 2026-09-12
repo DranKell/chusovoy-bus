@@ -881,13 +881,6 @@
     return { x: last.x, y: last.y, angle: 0 };
   }
 
-  // Route brand color mapping
-  const ROUTE_BRAND_COLORS = {
-    "1": "#2563eb",
-    "3": "#dc2626",
-    "4": "#059669",
-    "5": "#7c3aed",
-    "6": "#d97706",
   // ==========================================================================
   // LEAFLET OPENSTREETMAP INTERACTIVE BUS MAP & ROAD-SNAPPED TRACKS
   // ==========================================================================
