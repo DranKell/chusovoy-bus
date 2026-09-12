@@ -10,6 +10,8 @@ import io
 import re
 import json
 import logging
+import datetime
+from pathlib import Path
 from typing import List, Dict, Any, Optional
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
@@ -489,11 +491,74 @@ def parse_standard_sheet(rows: List[List[str]]) -> List[Dict[str, Any]]:
         }]
     }]
 
-def parse_all_routes() -> List[Dict[str, Any]]:
+FALLBACK_FILE = Path(__file__).parent.parent / "data_fallback.json"
+
+def get_current_time_perm_str() -> str:
+    try:
+        import zoneinfo
+        tz = zoneinfo.ZoneInfo("Asia/Yekaterinburg")
+        now = datetime.datetime.now(tz)
+    except Exception:
+        tz = datetime.timezone(datetime.timedelta(hours=5))
+        now = datetime.datetime.now(tz)
+    return now.strftime("%d.%m.%Y %H:%M")
+
+def load_fallback_data() -> Dict[str, Any]:
+    """Loads backup snapshot if Google Sheets is unreachable or missing."""
+    if FALLBACK_FILE.exists():
+        try:
+            with open(FALLBACK_FILE, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                if isinstance(data, dict) and "routes" in data:
+                    return data
+                elif isinstance(data, list):
+                    return {
+                        "routes": data,
+                        "fallbackDate": "ранее сохранённой",
+                        "isFallback": True
+                    }
+        except Exception as e:
+            logger.error(f"Failed to read fallback file {FALLBACK_FILE}: {e}")
+    
+    # Check data_preview.json as secondary fallback
+    preview_file = Path(__file__).parent.parent / "data_preview.json"
+    if preview_file.exists():
+        try:
+            with open(preview_file, "r", encoding="utf-8") as f:
+                routes = json.load(f)
+                return {
+                    "routes": routes,
+                    "fallbackDate": "локальной копии",
+                    "isFallback": True
+                }
+        except Exception as e:
+            logger.error(f"Failed to read preview file: {e}")
+
+    return {"routes": [], "isFallback": True, "fallbackDate": "неизвестно"}
+
+def save_fallback_snapshot(routes: List[Dict[str, Any]]) -> None:
+    """Saves valid routes snapshot with timestamp to data_fallback.json."""
+    if not routes or len(routes) < 5:
+        return
+    try:
+        snapshot = {
+            "savedAt": get_current_time_perm_str(),
+            "routesCount": len(routes),
+            "routes": routes
+        }
+        with open(FALLBACK_FILE, "w", encoding="utf-8") as f:
+            json.dump(snapshot, f, ensure_ascii=False, indent=2)
+        logger.info(f"Fallback snapshot successfully updated in {FALLBACK_FILE} ({len(routes)} routes)")
+    except Exception as e:
+        logger.warning(f"Could not save fallback snapshot: {e}")
+
+def parse_all_routes() -> Dict[str, Any]:
     """
     Downloads and parses all routes from Google Sheets.
+    Returns a dict with 'routes', 'isFallback', and 'fallbackDate'.
     """
     all_routes = []
+    fetch_errors = 0
     
     for gid in SHEET_GIDS:
         try:
@@ -501,6 +566,7 @@ def parse_all_routes() -> List[Dict[str, Any]]:
             rows = fetch_sheet_csv(SHEET_ID, gid)
             if not rows:
                 logger.warning(f"GID {gid} returned empty rows")
+                fetch_errors += 1
                 continue
                 
             if gid == "740366988":
@@ -516,7 +582,8 @@ def parse_all_routes() -> List[Dict[str, Any]]:
                 logger.info(f"  -> Маршрут №{r['number']}: {r['name']} ({len(r['sections'])} секций)")
                 all_routes.append(r)
         except Exception as e:
-            logger.error(f"Error parsing GID {gid}: {e}", exc_info=True)
+            fetch_errors += 1
+            logger.error(f"Error parsing GID {gid}: {e}")
             
     def sort_key(r):
         try:
@@ -525,11 +592,35 @@ def parse_all_routes() -> List[Dict[str, Any]]:
             return (1, r["number"])
             
     all_routes.sort(key=sort_key)
-    return all_routes
+
+    # Minimum threshold: We normally expect ~15-20 routes across all GIDs.
+    # If Google Sheets is unavailable, deleted or wiped out, switch to fallback snapshot.
+    if len(all_routes) < 5:
+        logger.warning(f"Parsed only {len(all_routes)} routes (too few or Google Sheets unavailable). Activating FALLBACK.")
+        fb = load_fallback_data()
+        fb_routes = fb.get("routes", [])
+        fb_date = fb.get("savedAt") or fb.get("fallbackDate") or "ранее сохранённой"
+        logger.info(f"Loaded {len(fb_routes)} routes from fallback snapshot ({fb_date}).")
+        return {
+            "routes": fb_routes,
+            "isFallback": True,
+            "fallbackDate": fb_date
+        }
+
+    # Successful live fetch: save snapshot for future offline resilience
+    save_fallback_snapshot(all_routes)
+
+    return {
+        "routes": all_routes,
+        "isFallback": False,
+        "fallbackDate": None
+    }
 
 if __name__ == "__main__":
-    routes = parse_all_routes()
-    print(f"\nTotal parsed routes: {len(routes)}")
+    result = parse_all_routes()
+    routes = result["routes"]
+    print(f"\nTotal parsed routes: {len(routes)} (isFallback={result.get('isFallback')})")
     with open("data_preview.json", "w", encoding="utf-8") as f:
         json.dump(routes, f, ensure_ascii=False, indent=2)
     print("Saved preview to data_preview.json")
+

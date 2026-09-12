@@ -121,6 +121,14 @@
         </div>
       </div>
 
+      <!-- Fallback Alert Banner (Shown only when offline snapshot is active) -->
+      <div class="fallback-banner" id="fallbackBanner" style="display: none;">
+        <span class="fallback-banner-icon">⚠️</span>
+        <div class="fallback-banner-text">
+          <strong>Внимание:</strong> Данные из резервной копии от <span id="fallbackBannerDate">ранее сохранённой</span>. <span class="fallback-banner-sub">Исходные данные отсутствуют</span>
+        </div>
+      </div>
+
       <!-- Toolbar: Search & Pills -->
       <div class="toolbar-section">
         <div class="search-wrapper">
@@ -251,9 +259,10 @@
     </div>
   </footer>
 
-  <!-- Embedded Schedule Data -->
+  <!-- Embedded Schedule Data & Meta -->
   <script>
     window.SCHEDULE_DATA = {{SCHEDULE_DATA_JSON}};
+    window.SCHEDULE_META = {{SCHEDULE_META_JSON}};
   </script>
 
   <!-- Inlined App Script -->

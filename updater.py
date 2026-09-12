@@ -39,11 +39,19 @@ def main():
     print("🚌 ========================================================\n")
 
     print("⏳ Загрузка данных из Google Таблиц...")
-    routes = parse_all_routes()
-    print(f"✅ Успешно обработано маршрутов: {len(routes)}")
+    data_result = parse_all_routes()
+    routes = data_result.get("routes", [])
+    is_fallback = data_result.get("isFallback", False)
+    fallback_date = data_result.get("fallbackDate")
+
+    if is_fallback:
+        print(f"⚠️ ВНИМАНИЕ: Активирован режим РЕЗЕРВНОЙ КОПИИ от {fallback_date}!")
+        print(f"⚠️ Исходные данные Google Sheets недоступны. Загружено маршрутов: {len(routes)}")
+    else:
+        print(f"✅ Успешно обработано маршрутов: {len(routes)}")
 
     print(f"\n📦 Сборка веб-интерфейса в {DIST_DIR}...")
-    output_html = build_static_site(routes, DIST_DIR)
+    output_html = build_static_site(data_result, DIST_DIR)
     print(f"✅ Готово! Файл создан: {output_html}")
     print(f"   Размер: {output_html.stat().st_size / 1024:.1f} KB (полностью автономный SPA)")
 

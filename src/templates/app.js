@@ -652,22 +652,20 @@
     setInterval(() => {
       updateClock();
       updateLedScoreboard();
-      updateLiveMapRadar();
     }, 5000);
+
+    // High-resolution live radar update (1000ms for smooth GPS-like animation)
+    setInterval(() => {
+      updateLiveMapRadar();
+    }, 1000);
   }
 
   // ==========================================================================
   // MEGA-ULTRA DYNAMIC RADAR: Theoretical Bus Positions on Chusovoy Scheme Map
-  // Calculates real-time progress between terminal and intermediate stops!
+  // Real-time GPS-simulated movement along exact street polylines & bridge!
   // ==========================================================================
 
   // Map nodes normalized percentages (X%, Y%) precisely calibrated on official Chusovoy scheme (1024x724)
-  // Left bank (Старый город / ЧМЗ / Завод):
-  //   Горбольница, Поликлиника, пл.ЧМЗ, Автостанция, Революционная, Сплавщиков
-  // Bridge crossing:
-  //   Заводская проходная (X: 44.5%, Y: 53.0%) ➔ Мост через р.Чусовая ➔ Правый берег (X: 52.0%, Y: 56.5%)
-  // Right bank (Новый город):
-  //   Школа №13, пл.Металлургов, Севастопольская, Кирова, Архиповка, Коммунистическая, Кошково
   const MAP_STOPS_COORDS = {
     // Left bank (West of river):
     "Горбольница": { x: 18.2, y: 45.2 },
@@ -755,6 +753,7 @@
   };
 
   // Route paths definition: strictly follow road lines and Cross the Bridge!
+  // Defined from canonical Start Stop to End Stop
   const ROUTE_PATHS = {
     // 1: пл.ЧМЗ ➔ Мост ➔ Закурье (п.Совхозный)
     "1": ["пл.ЧМЗ", "Французская", "Мост_Левый", "Мост_Правый", "ул.Чкалова", "50лет ВЛКСМ", "Закурье"],
@@ -795,28 +794,68 @@
     // 17: Школа 13 ➔ Мост ➔ Закурье ➔ Кошково
     "17": ["Школа №13", "ул.Чайковского", "Юбилейная", "пл.Металлургов", "ул.Чкалова", "Мост_Правый", "Мост_Левый", "Французская", "пл.ЧМЗ", "Мост_Левый", "Мост_Правый", "50лет ВЛКСМ", "Закурье", "п.Кошково"],
 
-    // 22: Школа 13 ➔ Мост ➔ Вокзал ➔ Архиповка
-    "22": ["Школа №13", "пл.Металлургов", "ул.Чкалова", "Мост_Правый", "Мост_Левый", "пл.ЧМЗ", "ДКЖ", "ж/д вокзал", "п.Архиповка"],
-
-    // Пригородные:
-    "101": ["АС Чусовой", "Дом спорта", "Кладбище", "п.Всесвятская"],
-    "322": ["АС Чусовой", "пл.ЧМЗ", "РМЗ", "ул.Сплавщиков", "п.Кучино"],
-    "323": ["АС Чусовой", "Французская", "Мост_Левый", "Мост_Правый", "Закурье", "Кошково", "п.Мыс"],
-    "324": ["АС Чусовой", "Французская", "Мост_Левый", "Мост_Правый", "Закурье", "Кошково", "ст.Калино"],
-    "325": ["АС Чусовой", "пл.ЧМЗ", "РМЗ", "ул.Сплавщиков", "п.Копально"],
-    "365": ["АС Чусовой", "пл.ЧМЗ", "РМЗ", "ул.Сплавщиков", "п.Центральный"],
-    "373": ["АС Чусовой", "Французская", "Мост_Левый", "Мост_Правый", "Закурье", "Кошково", "с.Сёла"],
-    "474": ["АС Чусовой", "Дом спорта", "Кладбище", "п.Всесвятская"]
+    // 22: Школа 13 ➔ Мост ➔ Вокзал ➔ Архиповка ➔ ГЛК Такман
+    "22": ["Школа №13", "пл.Металлургов", "ул.Чкалова", "Мост_Правый", "Мост_Левый", "пл.ЧМЗ", "ДКЖ", "ж/д вокзал", "п.Архиповка", "ГЛК Такман"]
   };
 
   function getStopCoord(name) {
     if (!name) return null;
-    if (MAP_STOPS_COORDS[name]) return MAP_STOPS_COORDS[name];
+    const clean = name.trim();
+    if (MAP_STOPS_COORDS[clean]) return MAP_STOPS_COORDS[clean];
     // fuzzy match
     for (let key in MAP_STOPS_COORDS) {
-      if (name.includes(key) || key.includes(name)) return MAP_STOPS_COORDS[key];
+      if (clean.includes(key) || key.includes(clean)) return MAP_STOPS_COORDS[key];
     }
     return null;
+  }
+
+  // Calculate distance-weighted position along a polyline
+  function interpolateAlongPolyline(points, progress) {
+    if (!points || points.length < 2) return null;
+    const clampedProgress = Math.max(0, Math.min(1, progress));
+
+    // Calculate segment lengths
+    const segLengths = [];
+    let totalDist = 0;
+    for (let i = 0; i < points.length - 1; i++) {
+      const dx = points[i + 1].x - points[i].x;
+      const dy = points[i + 1].y - points[i].y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      segLengths.push(dist);
+      totalDist += dist;
+    }
+
+    if (totalDist === 0) {
+      return { x: points[0].x, y: points[0].y, angle: 0 };
+    }
+
+    const targetDist = clampedProgress * totalDist;
+    let accumulatedDist = 0;
+
+    for (let i = 0; i < segLengths.length; i++) {
+      const segLen = segLengths[i];
+      if (accumulatedDist + segLen >= targetDist || i === segLengths.length - 1) {
+        const segFrac = segLen > 0 ? (targetDist - accumulatedDist) / segLen : 0;
+        const p1 = points[i];
+        const p2 = points[i + 1];
+        const curX = p1.x + (p2.x - p1.x) * segFrac;
+        const curY = p1.y + (p2.y - p1.y) * segFrac;
+
+        const dx = p2.x - p1.x;
+        const dy = p2.y - p1.y;
+        const angleDeg = Math.round(Math.atan2(dy, dx) * 180 / Math.PI);
+
+        return {
+          x: curX,
+          y: curY,
+          angle: angleDeg
+        };
+      }
+      accumulatedDist += segLen;
+    }
+
+    const last = points[points.length - 1];
+    return { x: last.x, y: last.y, angle: 0 };
   }
 
   // Calculate current live bus positions based on schedule
@@ -832,6 +871,9 @@
     const activeBuses = [];
 
     allRoutes.forEach(route => {
+      // На интерактивной схеме города показываем только городские автобусы
+      if (route.category === 'suburban') return;
+
       route.sections.forEach(sec => {
         if (sec.type === 'weekday' && weekendToday) return;
         if (sec.type === 'weekend' && !weekendToday) return;
@@ -839,66 +881,88 @@
         const stops = sec.stops;
         if (!stops || stops.length < 2) return;
 
-        sec.schedule.forEach(trip => {
-          const firstStop = stops[0];
-          const lastStop = stops[stops.length - 1];
-          const tStartObj = trip[firstStop];
-          const tEndObj = trip[lastStop];
+        sec.schedule.forEach((trip, tripIndex) => {
+          // Find first stop with valid departure time
+          let startStop = null;
+          let tStartObj = null;
+          let endStop = null;
+          let tEndObj = null;
 
-          if (!tStartObj || !tStartObj.time) return;
+          for (let s of stops) {
+            if (trip[s] && trip[s].time) {
+              if (!startStop) {
+                startStop = s;
+                tStartObj = trip[s];
+              }
+              endStop = s;
+              tEndObj = trip[s];
+            }
+          }
+
+          if (!startStop || !tStartObj || !tStartObj.time) return;
 
           const [sh, sm] = tStartObj.time.split(':').map(Number);
           const startMin = sh * 60 + sm;
 
-          // Estimate end time if not given (typical trip 20-35 mins)
+          // Trip duration estimation
           let endMin = startMin + 25;
-          if (tEndObj && tEndObj.time) {
+          if (tEndObj && tEndObj.time && endStop !== startStop) {
             const [eh, em] = tEndObj.time.split(':').map(Number);
-            endMin = eh * 60 + em;
-            if (endMin < startMin) endMin += 1440; // overnight
+            let calculatedEnd = eh * 60 + em;
+            if (calculatedEnd < startMin) calculatedEnd += 1440;
+            if (calculatedEnd > startMin) endMin = calculatedEnd;
           }
 
-          // Check if bus is actively en route right now (with 3 min window before departure)
-          if (nowMinutes >= startMin - 1 && nowMinutes <= endMin + 1) {
+          // Check if bus is actively en route right now (with 1 min margin)
+          if (nowMinutes >= startMin && nowMinutes <= endMin) {
             const progress = Math.max(0, Math.min(1, (nowMinutes - startMin) / Math.max(1, endMin - startMin)));
 
-            // Compute interpolated position along route path
-            const pathNames = ROUTE_PATHS[route.number] || stops;
+            // Construct exact waypoint coordinates for this route
+            const baseRoutePath = ROUTE_PATHS[route.number];
+            let pathSequence = [];
+
+            if (baseRoutePath && baseRoutePath.length > 0) {
+              pathSequence = [...baseRoutePath];
+
+              // Direction handling: if schedule sequence indicates reverse direction, reverse waypoints
+              const firstBase = baseRoutePath[0];
+              const lastBase = baseRoutePath[baseRoutePath.length - 1];
+
+              // Check if departure is closer to lastBase than firstBase
+              const isReverse = (startStop.includes(lastBase) || lastBase.includes(startStop)) &&
+                                !(startStop.includes(firstBase) || firstBase.includes(startStop));
+
+              if (isReverse) {
+                pathSequence.reverse();
+              }
+            } else {
+              pathSequence = [...stops];
+            }
+
+            // Convert names to coordinates
             const validCoords = [];
-            pathNames.forEach(st => {
+            pathSequence.forEach(st => {
               const c = getStopCoord(st);
               if (c) validCoords.push(c);
             });
 
             if (validCoords.length >= 2) {
-              const totalSegments = validCoords.length - 1;
-              const segProgress = progress * totalSegments;
-              const curSeg = Math.floor(segProgress);
-              const frac = segProgress - curSeg;
-
-              const p1 = validCoords[Math.min(curSeg, totalSegments - 1)];
-              const p2 = validCoords[Math.min(curSeg + 1, totalSegments)];
-
-              const curX = p1.x + (p2.x - p1.x) * frac;
-              const curY = p1.y + (p2.y - p1.y) * frac;
-
-              // Direction angle for headlights
-              const dx = p2.x - p1.x;
-              const dy = p2.y - p1.y;
-              const angleDeg = Math.round(Math.atan2(dy, dx) * 180 / Math.PI);
-
-              activeBuses.push({
-                num: route.number,
-                name: route.name,
-                from: firstStop,
-                to: lastStop,
-                x: curX,
-                y: curY,
-                angle: angleDeg,
-                startTime: tStartObj.time,
-                progressPct: Math.round(progress * 100),
-                note: tStartObj.note
-              });
+              const pos = interpolateAlongPolyline(validCoords, progress);
+              if (pos) {
+                activeBuses.push({
+                  id: `bus-${route.number}-${tripIndex}-${startStop}`,
+                  num: route.number,
+                  name: route.name,
+                  from: startStop,
+                  to: endStop || stops[stops.length - 1],
+                  x: Number(pos.x.toFixed(2)),
+                  y: Number(pos.y.toFixed(2)),
+                  angle: pos.angle,
+                  startTime: tStartObj.time,
+                  progressPct: Math.round(progress * 100),
+                  note: tStartObj.note || (tEndObj ? tEndObj.note : '')
+                });
+              }
             }
           }
         });
@@ -913,7 +977,7 @@
     let overlayHtml = '';
     activeBuses.forEach(b => {
       overlayHtml += `
-        <div class="live-map-bus" style="left: ${b.x}%; top: ${b.y}%;" title="Маршрут №${b.num}">
+        <div class="live-map-bus" id="${b.id}" style="left: ${b.x}%; top: ${b.y}%;" title="Маршрут №${b.num}">
           <div class="map-bus-tooltip">
             <strong>№${b.num} ${b.from} ➔ ${b.to}</strong><br>
             Отпр: ${b.startTime} • В пути ${b.progressPct}% ${b.note ? '• ' + b.note : ''}
@@ -944,6 +1008,21 @@
     overlay.innerHTML = overlayHtml;
   }
 
+  // Check and display fallback banner if offline snapshot is in use
+  function checkFallbackStatus() {
+    const meta = window.SCHEDULE_META;
+    if (meta && meta.isFallback) {
+      const banner = document.getElementById('fallbackBanner');
+      const dateEl = document.getElementById('fallbackBannerDate');
+      if (banner) {
+        if (dateEl && meta.fallbackDate) {
+          dateEl.textContent = meta.fallbackDate;
+        }
+        banner.style.display = 'flex';
+      }
+    }
+  }
+
   // Initialization
   function init() {
     applyTheme(getPreferredTheme());
@@ -952,6 +1031,7 @@
     renderRoutes();
     updateLedScoreboard();
     updateLiveMapRadar();
+    checkFallbackStatus();
   }
 
   // Run on DOM Ready

@@ -12,9 +12,18 @@ from typing import List, Dict, Any
 
 TEMPLATES_DIR = Path(__file__).parent / "templates"
 
-def build_static_site(routes: List[Dict[str, Any]], output_dir: Path) -> Path:
+def build_static_site(data_input: Any, output_dir: Path) -> Path:
     output_dir.mkdir(parents=True, exist_ok=True)
     
+    if isinstance(data_input, dict):
+        routes = data_input.get("routes", [])
+        is_fallback = data_input.get("isFallback", False)
+        fallback_date = data_input.get("fallbackDate")
+    else:
+        routes = data_input
+        is_fallback = False
+        fallback_date = None
+
     html_template_path = TEMPLATES_DIR / "index.html"
     css_path = TEMPLATES_DIR / "style.css"
     js_path = TEMPLATES_DIR / "app.js"
@@ -45,11 +54,16 @@ def build_static_site(routes: List[Dict[str, Any]], output_dir: Path) -> Path:
         "November", "ноября").replace("December", "декабря")
         
     json_data = json.dumps(routes, ensure_ascii=False, separators=(',', ':'))
+    meta_json = json.dumps({
+        "isFallback": bool(is_fallback),
+        "fallbackDate": fallback_date or now_str
+    }, ensure_ascii=False)
     
     # Render template
     rendered = html_template.replace("{{INLINED_STYLE}}", css_content)
     rendered = rendered.replace("{{INLINED_SCRIPT}}", js_content)
     rendered = rendered.replace("{{SCHEDULE_DATA_JSON}}", json_data)
+    rendered = rendered.replace("{{SCHEDULE_META_JSON}}", meta_json)
     rendered = rendered.replace("{{BUILD_DATE}}", date_str)
     rendered = rendered.replace("{{BUILD_TIMESTAMP}}", now_str)
     
@@ -66,6 +80,13 @@ def build_static_site(routes: List[Dict[str, Any]], output_dir: Path) -> Path:
     # Also dump data.json for API / testing
     data_file = output_dir / "schedule.json"
     with open(data_file, "w", encoding="utf-8") as f:
-        f.write(json.dumps(routes, ensure_ascii=False, indent=2))
+        f.write(json.dumps({
+            "meta": {
+                "isFallback": bool(is_fallback),
+                "fallbackDate": fallback_date,
+                "generatedAt": now_str
+            },
+            "routes": routes
+        }, ensure_ascii=False, indent=2))
         
     return out_file
