@@ -474,12 +474,13 @@ body {
 }
 
 .scheme-modal-sheet {
-  max-width: 90vw;
-  width: 90vw;
-  height: 90vh;
-  max-height: 90vh;
-  display: flex;
-  flex-direction: column;
+  width: 90vw !important;
+  max-width: 90vw !important;
+  height: 90vh !important;
+  max-height: 90vh !important;
+  display: flex !important;
+  flex-direction: column !important;
+  margin: auto !important;
 }
 
 .leaflet-map-container {
@@ -1778,9 +1779,10 @@ body {
   }
 
   .scheme-modal-sheet {
-    max-width: 94vw;
-    width: 94vw;
-    height: 92vh;
+    width: 92vw !important;
+    max-width: 92vw !important;
+    height: 92vh !important;
+    max-height: 92vh !important;
   }
 
   .scheme-toolbar {
