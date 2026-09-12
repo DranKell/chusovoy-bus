@@ -734,6 +734,36 @@ body {
   opacity: 0.95;
 }
 
+/* Custom Leaflet Stop Pin (Intermediate and Terminals) */
+.leaflet-stop-pin {
+  background: transparent;
+  border: none;
+}
+
+.leaflet-stop-dot {
+  width: 10px;
+  height: 10px;
+  background: #ffffff;
+  border: 2px solid #2563eb;
+  border-radius: 50%;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.45);
+  cursor: pointer;
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+
+.leaflet-stop-dot:hover {
+  transform: scale(1.6);
+  background: #f59e0b;
+}
+
+.leaflet-stop-dot.highlight {
+  width: 13px;
+  height: 13px;
+  background: #f59e0b;
+  border: 2.5px solid #ffffff;
+  box-shadow: 0 0 8px rgba(245, 158, 11, 0.8);
+}
+
 /* Custom Leaflet Bus Vehicle Pin */
 .leaflet-bus-icon {
   background: transparent;
