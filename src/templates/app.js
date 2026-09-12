@@ -1191,6 +1191,11 @@
         const stops = sec.stops;
         if (!stops || stops.length < 2) return;
 
+        // Find currently active trips, or pick the nearest trip
+        let activeTrips = [];
+        let nearestTrip = null;
+        let minDiff = Infinity;
+
         sec.schedule.forEach(trip => {
           let startMin = null;
           let tStart = null;
@@ -1204,18 +1209,24 @@
           }
 
           if (startMin === null) return;
-          const endMin = startMin + 26; // trip duration 26 mins
-
-          // Check if bus is en route (or show demo position if no bus right this minute)
-          let progress = 0.5; // fallback demo position along track
-          let isLive = false;
+          const endMin = startMin + 28; // average route run duration ~28 mins
 
           if (nowMinutes >= startMin && nowMinutes <= endMin) {
-            progress = (nowMinutes - startMin) / (endMin - startMin);
-            isLive = true;
+            const progress = (nowMinutes - startMin) / (endMin - startMin);
+            activeTrips.push({ trip, tStart, progress, isLive: true });
+          } else {
+            const diff = Math.abs(nowMinutes - startMin);
+            if (diff < minDiff) {
+              minDiff = diff;
+              nearestTrip = { trip, tStart, progress: 0.35, isLive: false };
+            }
           }
+        });
 
-          // If looking at specific route, always show bus either at live time or current theoretical position
+        // If buses are active right now, show them; otherwise display the nearest bus on track
+        const tripsToShow = activeTrips.length > 0 ? activeTrips : (nearestTrip ? [nearestTrip] : []);
+
+        tripsToShow.forEach(({ tStart, progress, isLive }) => {
           const busPos = interpolateLeafletPolyline(trackData.points, progress);
           if (busPos) {
             const busColor = trackData.color || ROUTE_BRAND_COLORS[rNum] || '#f59e0b';
@@ -1223,11 +1234,11 @@
               <div class="leaflet-bus-marker-wrap">
                 <div class="leaflet-bus-badge" style="background: ${busColor};">№ ${rNum}</div>
                 <div class="leaflet-bus-svg-wrap" style="transform: rotate(${busPos.angle - 90}deg);">
-                  <svg width="32" height="20" viewBox="0 0 50 30" fill="none">
-                    <rect x="4" y="5" width="40" height="20" rx="4" fill="${busColor}" stroke="#fff" stroke-width="1.5" />
+                  <svg width="34" height="22" viewBox="0 0 50 30" fill="none">
+                    <rect x="4" y="5" width="40" height="20" rx="4" fill="${busColor}" stroke="#fff" stroke-width="2" />
                     <rect x="10" y="3" width="28" height="4" rx="1.5" fill="#ffffff" />
                     <rect x="8" y="9" width="30" height="7" rx="1.5" fill="#1e252d" />
-                    <circle cx="43" cy="15" r="3" fill="#fef08a" />
+                    <circle cx="43" cy="15" r="3.5" fill="#fef08a" />
                   </svg>
                 </div>
               </div>
@@ -1236,12 +1247,12 @@
             const busIcon = L.divIcon({
               className: 'leaflet-bus-icon',
               html: iconHtml,
-              iconSize: [40, 40],
-              iconAnchor: [20, 20]
+              iconSize: [44, 44],
+              iconAnchor: [22, 22]
             });
 
             const marker = L.marker([busPos.lat, busPos.lon], { icon: busIcon })
-              .bindTooltip(`<strong>Маршрут №${rNum}</strong><br>${isLive ? 'В рейсе • Отпр: ' + tStart : 'На линии'}`, { direction: 'top' })
+              .bindTooltip(`<strong>Маршрут №${rNum}</strong><br>${isLive ? 'В рейсе • Отпр: ' + tStart : 'Плановый рейс: ' + tStart}`, { direction: 'top' })
               .addTo(leafletMap);
 
             activeBusMarkers.push(marker);
