@@ -1097,7 +1097,6 @@
         <div class="active-route-info-card" style="border-left: 3px solid ${ROUTE_BRAND_COLORS[route.number]}; padding-left: 0.5rem;">
           <strong>№${route.number} ${route.name}</strong>
           ${route.streets ? `<span>Через: ${route.streets}</span>` : ''}
-          <span style="color:#10b981; font-weight:700; margin-top:3px;">● Трасса выровнена по дорогам Чусового</span>
         </div>
       `;
     }
