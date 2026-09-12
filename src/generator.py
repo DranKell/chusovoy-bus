@@ -59,11 +59,15 @@ def build_static_site(data_input: Any, output_dir: Path) -> Path:
         "fallbackDate": fallback_date or now_str
     }, ensure_ascii=False)
     
+    tracks_file = TEMPLATES_DIR / "real_routes_tracks.json"
+    tracks_json = tracks_file.read_text(encoding="utf-8") if tracks_file.exists() else "{}"
+
     # Render template
     rendered = html_template.replace("{{INLINED_STYLE}}", css_content)
     rendered = rendered.replace("{{INLINED_SCRIPT}}", js_content)
     rendered = rendered.replace("{{SCHEDULE_DATA_JSON}}", json_data)
     rendered = rendered.replace("{{SCHEDULE_META_JSON}}", meta_json)
+    rendered = rendered.replace("{{REAL_ROUTES_TRACKS_JSON}}", tracks_json)
     rendered = rendered.replace("{{BUILD_DATE}}", date_str)
     rendered = rendered.replace("{{BUILD_TIMESTAMP}}", now_str)
     

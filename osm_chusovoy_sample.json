@@ -1,0 +1,1094 @@
+[
+  {
+    "type": "node",
+    "id": 671204538,
+    "lat": 58.3139459,
+    "lon": 57.7703232,
+    "tags": {
+      "bus": "yes",
+      "highway": "bus_stop",
+      "name": "Сплавщиков",
+      "operator": "Чусовское АТП",
+      "public_transport": "stop_position"
+    }
+  },
+  {
+    "type": "node",
+    "id": 691216395,
+    "lat": 58.2906123,
+    "lon": 57.8412123,
+    "tags": {
+      "bench": "yes",
+      "bus": "yes",
+      "highway": "bus_stop",
+      "name": "Станция Чусовская (ж/д вокзал)",
+      "operator": "Чусовское АТП",
+      "public_transport": "platform",
+      "shelter": "yes"
+    }
+  },
+  {
+    "type": "node",
+    "id": 897277711,
+    "lat": 58.3012827,
+    "lon": 57.7962403,
+    "tags": {
+      "highway": "bus_stop",
+      "name": "РМЗ",
+      "operator": "Чусовское АТП",
+      "shelter": "yes"
+    }
+  },
+  {
+    "type": "node",
+    "id": 897277716,
+    "lat": 58.3064002,
+    "lon": 57.8075175,
+    "tags": {
+      "highway": "bus_stop",
+      "name": "поликлиника",
+      "operator": "Чусовское АТП",
+      "shelter": "yes"
+    }
+  },
+  {
+    "type": "node",
+    "id": 897277739,
+    "lat": 58.3234718,
+    "lon": 57.701886,
+    "tags": {
+      "highway": "bus_stop",
+      "name": "Саламатово",
+      "public_transport": "platform",
+      "shelter": "yes"
+    }
+  },
+  {
+    "type": "node",
+    "id": 1424656667,
+    "lat": 58.3041383,
+    "lon": 57.7838385,
+    "tags": {
+      "bench": "yes",
+      "highway": "bus_stop",
+      "name": "База торга",
+      "operator": "Чусовское АТП",
+      "shelter": "yes"
+    }
+  },
+  {
+    "type": "node",
+    "id": 1424656689,
+    "lat": 58.3081898,
+    "lon": 57.7097305,
+    "tags": {
+      "highway": "bus_stop",
+      "name": "Саломатово"
+    }
+  },
+  {
+    "type": "node",
+    "id": 2383745124,
+    "lat": 58.2710657,
+    "lon": 57.8254325,
+    "tags": {
+      "bench": "yes",
+      "bus": "yes",
+      "highway": "bus_stop",
+      "name": "Пермская улица",
+      "operator": "Чусовское АТП",
+      "public_transport": "stop_position",
+      "shelter": "yes"
+    }
+  },
+  {
+    "type": "node",
+    "id": 4031370369,
+    "lat": 58.3011019,
+    "lon": 57.7971854,
+    "tags": {
+      "highway": "bus_stop",
+      "name": "РМЗ",
+      "operator": "Чусовское АТП",
+      "shelter": "yes"
+    }
+  },
+  {
+    "type": "node",
+    "id": 4046956639,
+    "lat": 58.3014634,
+    "lon": 57.8153124,
+    "tags": {
+      "bus": "yes",
+      "highway": "bus_stop",
+      "name": "Администрация",
+      "operator": "Чусовское АТП",
+      "public_transport": "stop_position"
+    }
+  },
+  {
+    "type": "node",
+    "id": 4046956641,
+    "lat": 58.3061666,
+    "lon": 57.8075081,
+    "tags": {
+      "bus": "yes",
+      "highway": "bus_stop",
+      "name": "поликлиника",
+      "operator": "Чусовское АТП",
+      "public_transport": "stop_position",
+      "shelter": "no"
+    }
+  },
+  {
+    "type": "node",
+    "id": 4047125605,
+    "lat": 58.3018188,
+    "lon": 57.8087373,
+    "tags": {
+      "bench": "yes",
+      "bus": "yes",
+      "highway": "bus_stop",
+      "name": "ЖБК",
+      "operator": "Чусовское АТП",
+      "public_transport": "platform",
+      "shelter": "yes"
+    }
+  },
+  {
+    "type": "node",
+    "id": 4047209204,
+    "lat": 58.3017271,
+    "lon": 57.8078076,
+    "tags": {
+      "bench": "yes",
+      "bus": "yes",
+      "highway": "bus_stop",
+      "name": "ЖБК",
+      "operator": "Чусовское АТП",
+      "public_transport": "platform",
+      "shelter": "yes"
+    }
+  },
+  {
+    "type": "node",
+    "id": 4047391059,
+    "lat": 58.2677375,
+    "lon": 57.8101618,
+    "tags": {
+      "bench": "yes",
+      "highway": "bus_stop",
+      "operator": "Чусовское АТП",
+      "shelter": "yes"
+    }
+  },
+  {
+    "type": "node",
+    "id": 4047391060,
+    "lat": 58.2684132,
+    "lon": 57.8101699,
+    "tags": {
+      "bench": "yes",
+      "highway": "bus_stop",
+      "operator": "Чусовское АТП",
+      "shelter": "yes"
+    }
+  },
+  {
+    "type": "node",
+    "id": 4047444795,
+    "lat": 58.2969969,
+    "lon": 57.8202636,
+    "tags": {
+      "highway": "bus_stop",
+      "name": "Дом творчества",
+      "operator": "Чусовское АТП"
+    }
+  },
+  {
+    "type": "node",
+    "id": 4047444796,
+    "lat": 58.2970758,
+    "lon": 57.8206069,
+    "tags": {
+      "bench": "yes",
+      "highway": "bus_stop",
+      "name": "Дом творчества",
+      "operator": "Чусовское АТП",
+      "shelter": "yes"
+    }
+  },
+  {
+    "type": "node",
+    "id": 4047474517,
+    "lat": 58.2696122,
+    "lon": 57.8333227,
+    "tags": {
+      "bench": "yes",
+      "highway": "bus_stop",
+      "operator": "Чусовское АТП",
+      "shelter": "yes"
+    }
+  },
+  {
+    "type": "node",
+    "id": 4047640790,
+    "lat": 58.2679314,
+    "lon": 57.8233812,
+    "tags": {
+      "bench": "yes",
+      "bus": "yes",
+      "highway": "bus_stop",
+      "name": "Юбилейный",
+      "operator": "Чусовское АТП",
+      "public_transport": "platform",
+      "shelter": "yes"
+    }
+  },
+  {
+    "type": "node",
+    "id": 4047653239,
+    "lat": 58.2781942,
+    "lon": 57.8049436,
+    "tags": {
+      "bench": "yes",
+      "highway": "bus_stop",
+      "name": "улица 50 лет ВЛКСМ",
+      "operator": "Чусовское АТП",
+      "shelter": "yes"
+    }
+  },
+  {
+    "type": "node",
+    "id": 4047795406,
+    "lat": 58.2685877,
+    "lon": 57.8245175,
+    "tags": {
+      "bench": "yes",
+      "bus": "yes",
+      "highway": "bus_stop",
+      "name": "Юбилейный",
+      "operator": "Чусовское АТП",
+      "public_transport": "platform",
+      "shelter": "yes"
+    }
+  },
+  {
+    "type": "node",
+    "id": 4047795408,
+    "lat": 58.2654132,
+    "lon": 57.8244728,
+    "tags": {
+      "bench": "yes",
+      "highway": "bus_stop",
+      "name": "Школа № 13",
+      "operator": "Чусовское АТП",
+      "shelter": "yes"
+    }
+  },
+  {
+    "type": "node",
+    "id": 4047795409,
+    "lat": 58.2657052,
+    "lon": 57.8251688,
+    "tags": {
+      "bench": "yes",
+      "highway": "bus_stop",
+      "name": "Школа № 13",
+      "operator": "Чусовское АТП",
+      "shelter": "yes"
+    }
+  },
+  {
+    "type": "node",
+    "id": 4047907153,
+    "lat": 58.2931412,
+    "lon": 57.8356865,
+    "tags": {
+      "bench": "yes",
+      "bus": "yes",
+      "highway": "bus_stop",
+      "name": "Матросова",
+      "operator": "Чусовское АТП",
+      "public_transport": "platform",
+      "shelter": "yes"
+    }
+  },
+  {
+    "type": "node",
+    "id": 4047907154,
+    "lat": 58.2936536,
+    "lon": 57.8349344,
+    "tags": {
+      "bench": "yes",
+      "highway": "bus_stop",
+      "name": "Матросова",
+      "operator": "Чусовское АТП",
+      "shelter": "yes"
+    }
+  },
+  {
+    "type": "node",
+    "id": 4049764470,
+    "lat": 58.2747577,
+    "lon": 57.8155636,
+    "tags": {
+      "bench": "yes",
+      "bus": "yes",
+      "highway": "bus_stop",
+      "name": "Юность",
+      "operator": "Чусовское АТП",
+      "public_transport": "platform",
+      "shelter": "yes"
+    }
+  },
+  {
+    "type": "node",
+    "id": 4052229236,
+    "lat": 58.2725977,
+    "lon": 57.8341046,
+    "tags": {
+      "bench": "yes",
+      "highway": "bus_stop",
+      "operator": "Чусовское АТП",
+      "shelter": "yes"
+    }
+  },
+  {
+    "type": "node",
+    "id": 4054085046,
+    "lat": 58.280932,
+    "lon": 57.857013,
+    "tags": {
+      "bench": "yes",
+      "highway": "bus_stop",
+      "name": "п. Кирова",
+      "operator": "Чусовское АТП",
+      "shelter": "yes"
+    }
+  },
+  {
+    "type": "node",
+    "id": 4054177558,
+    "lat": 58.2825234,
+    "lon": 57.8471237,
+    "tags": {
+      "bench": "yes",
+      "highway": "bus_stop",
+      "name": "Кольцова",
+      "operator": "Чусовское АТП",
+      "shelter": "yes"
+    }
+  },
+  {
+    "type": "node",
+    "id": 4054269529,
+    "lat": 58.2837687,
+    "lon": 57.8373287,
+    "tags": {
+      "bench": "yes",
+      "highway": "bus_stop",
+      "name": "Киоск",
+      "operator": "Чусовское АТП",
+      "shelter": "yes"
+    }
+  },
+  {
+    "type": "node",
+    "id": 4054305016,
+    "lat": 58.2785883,
+    "lon": 57.8595198,
+    "tags": {
+      "bench": "yes",
+      "highway": "bus_stop",
+      "name": "Дробильныи",
+      "operator": "Чусовское АТП",
+      "shelter": "yes"
+    }
+  },
+  {
+    "type": "node",
+    "id": 4054333649,
+    "lat": 58.2858611,
+    "lon": 57.8286758,
+    "tags": {
+      "bench": "yes",
+      "highway": "bus_stop",
+      "name": "Отделение связи",
+      "operator": "Чусовское АТП",
+      "shelter": "yes"
+    }
+  },
+  {
+    "type": "node",
+    "id": 4054608282,
+    "lat": 58.2845055,
+    "lon": 57.812663,
+    "tags": {
+      "bench": "yes",
+      "highway": "bus_stop",
+      "name": "Мост",
+      "operator": "Чусовское АТП",
+      "shelter": "yes"
+    }
+  },
+  {
+    "type": "node",
+    "id": 4054608283,
+    "lat": 58.2844814,
+    "lon": 57.8157851,
+    "tags": {
+      "bench": "yes",
+      "highway": "bus_stop",
+      "name": "Чкалова",
+      "operator": "Чусовское АТП",
+      "shelter": "yes"
+    }
+  },
+  {
+    "type": "node",
+    "id": 4054633766,
+    "lat": 58.2905871,
+    "lon": 57.8183185,
+    "tags": {
+      "bench": "yes",
+      "highway": "bus_stop",
+      "name": "Переезд",
+      "operator": "Чусовское АТП",
+      "shelter": "yes"
+    }
+  },
+  {
+    "type": "node",
+    "id": 4054633767,
+    "lat": 58.2910382,
+    "lon": 57.8181267,
+    "tags": {
+      "bench": "no",
+      "highway": "bus_stop",
+      "name": "Переезд",
+      "operator": "Чусовское АТП",
+      "shelter": "yes"
+    }
+  },
+  {
+    "type": "node",
+    "id": 4054649265,
+    "lat": 58.2951701,
+    "lon": 57.8143099,
+    "tags": {
+      "bench": "no",
+      "highway": "bus_stop",
+      "name": "Пл.ЧМЗ",
+      "operator": "Чусовское АТП",
+      "shelter": "yes"
+    }
+  },
+  {
+    "type": "node",
+    "id": 4054679653,
+    "lat": 58.2957374,
+    "lon": 57.8144467,
+    "tags": {
+      "bench": "no",
+      "highway": "bus_stop",
+      "name": "Пл.ЧМЗ",
+      "operator": "Чусовское АТП",
+      "shelter": "yes"
+    }
+  },
+  {
+    "type": "node",
+    "id": 4054703789,
+    "lat": 58.304376,
+    "lon": 57.7981294,
+    "tags": {
+      "bench": "yes",
+      "highway": "bus_stop",
+      "name": "Горбольница",
+      "operator": "Чусовское АТП",
+      "shelter": "yes"
+    }
+  },
+  {
+    "type": "node",
+    "id": 4054703790,
+    "lat": 58.3055116,
+    "lon": 57.8072879,
+    "tags": {
+      "bench": "yes",
+      "highway": "bus_stop",
+      "name": "ДКМ",
+      "operator": "Чусовское АТП",
+      "shelter": "yes"
+    }
+  },
+  {
+    "type": "node",
+    "id": 4054736939,
+    "lat": 58.3176026,
+    "lon": 57.8016338,
+    "tags": {
+      "bench": "yes",
+      "bus": "yes",
+      "highway": "bus_stop",
+      "name": "Улица Революционная",
+      "operator": "Чусовское АТП",
+      "public_transport": "platform",
+      "shelter": "yes"
+    }
+  },
+  {
+    "type": "node",
+    "id": 4054765464,
+    "lat": 58.3127075,
+    "lon": 57.8063698,
+    "tags": {
+      "bus": "yes",
+      "highway": "bus_stop",
+      "name": "Маг.№32",
+      "operator": "Чусовское АТП",
+      "public_transport": "stop_position"
+    }
+  },
+  {
+    "type": "node",
+    "id": 4054765465,
+    "lat": 58.309164,
+    "lon": 57.8099943,
+    "tags": {
+      "bench": "yes",
+      "highway": "bus_stop",
+      "name": "д-я. П. Морозова",
+      "operator": "Чусовское АТП",
+      "shelter": "yes"
+    }
+  },
+  {
+    "type": "node",
+    "id": 4054776216,
+    "lat": 58.2955585,
+    "lon": 57.82934,
+    "tags": {
+      "bench": "yes",
+      "bus": "yes",
+      "highway": "bus_stop",
+      "name": "ДКЖ",
+      "operator": "Чусовское АТП",
+      "public_transport": "platform",
+      "shelter": "yes"
+    }
+  },
+  {
+    "type": "node",
+    "id": 4054803289,
+    "lat": 58.2876024,
+    "lon": 57.8489867,
+    "tags": {
+      "bench": "yes",
+      "bus": "yes",
+      "highway": "bus_stop",
+      "operator": "Чусовское АТП",
+      "public_transport": "platform",
+      "shelter": "yes"
+    }
+  },
+  {
+    "type": "node",
+    "id": 4054803290,
+    "lat": 58.2866438,
+    "lon": 57.8581189,
+    "tags": {
+      "bench": "yes",
+      "bus": "yes",
+      "highway": "bus_stop",
+      "name": "Архиповка",
+      "operator": "Чусовское АТП",
+      "public_transport": "platform",
+      "shelter": "yes"
+    }
+  },
+  {
+    "type": "node",
+    "id": 4054857870,
+    "lat": 58.2992915,
+    "lon": 57.8141408,
+    "tags": {
+      "bus": "yes",
+      "highway": "bus_stop",
+      "name": "Южная",
+      "operator": "Чусовское АТП",
+      "public_transport": "stop_position"
+    }
+  },
+  {
+    "type": "node",
+    "id": 4054884605,
+    "lat": 58.3058512,
+    "lon": 57.7703605,
+    "tags": {
+      "bench": "yes",
+      "highway": "bus_stop",
+      "name": "Вильвенская",
+      "operator": "Чусовское АТП",
+      "shelter": "yes"
+    }
+  },
+  {
+    "type": "node",
+    "id": 4054913466,
+    "lat": 58.3099416,
+    "lon": 57.7694413,
+    "tags": {
+      "bus": "yes",
+      "highway": "bus_stop",
+      "name": "Черноморская",
+      "operator": "Чусовское АТП",
+      "public_transport": "stop_position",
+      "shelter": "yes"
+    }
+  },
+  {
+    "type": "node",
+    "id": 4055041694,
+    "lat": 58.2802436,
+    "lon": 57.784585,
+    "tags": {
+      "bench": "yes",
+      "highway": "bus_stop",
+      "operator": "Чусовское АТП",
+      "shelter": "yes"
+    }
+  },
+  {
+    "type": "node",
+    "id": 4055041700,
+    "lat": 58.2818354,
+    "lon": 57.7711234,
+    "tags": {
+      "bench": "yes",
+      "bus": "yes",
+      "highway": "bus_stop",
+      "operator": "Чусовское АТП",
+      "public_transport": "stop_position",
+      "shelter": "yes"
+    }
+  },
+  {
+    "type": "node",
+    "id": 4055041702,
+    "lat": 58.2845794,
+    "lon": 57.8106433,
+    "tags": {
+      "bench": "yes",
+      "highway": "bus_stop",
+      "shelter": "yes"
+    }
+  },
+  {
+    "type": "node",
+    "id": 4055041718,
+    "lat": 58.2811578,
+    "lon": 57.8004791,
+    "tags": {
+      "bench": "yes",
+      "highway": "bus_stop",
+      "name": "Подвесной мост",
+      "operator": "Чусовское АТП",
+      "shelter": "yes"
+    }
+  },
+  {
+    "type": "node",
+    "id": 4055041719,
+    "lat": 58.2881819,
+    "lon": 57.7222779,
+    "tags": {
+      "bench": "yes",
+      "highway": "bus_stop",
+      "name": "Поссовет",
+      "operator": "Чусовское АТП",
+      "shelter": "yes"
+    }
+  },
+  {
+    "type": "node",
+    "id": 4055041720,
+    "lat": 58.29007,
+    "lon": 57.7154385,
+    "tags": {
+      "bench": "yes",
+      "bus": "yes",
+      "highway": "bus_stop",
+      "name": "Спутник",
+      "operator": "Чусовское АТП",
+      "public_transport": "stop_position",
+      "shelter": "yes"
+    }
+  },
+  {
+    "type": "node",
+    "id": 4055041721,
+    "lat": 58.281095,
+    "lon": 57.7438456,
+    "tags": {
+      "bench": "yes",
+      "highway": "bus_stop",
+      "name": "Улица Матросова",
+      "operator": "Чусовское АТП",
+      "shelter": "yes"
+    }
+  },
+  {
+    "type": "node",
+    "id": 4055041722,
+    "lat": 58.2861101,
+    "lon": 57.7315661,
+    "tags": {
+      "bus": "yes",
+      "highway": "bus_stop",
+      "name": "Улица Набережная",
+      "operator": "Чусовское АТП",
+      "public_transport": "stop_position"
+    }
+  },
+  {
+    "type": "node",
+    "id": 4055282326,
+    "lat": 58.2763304,
+    "lon": 57.7979027,
+    "tags": {
+      "bench": "no",
+      "bus": "yes",
+      "highway": "bus_stop",
+      "name": "Ул. Коммунистическая",
+      "operator": "Чусовское АТП",
+      "public_transport": "stop_position",
+      "shelter": "no"
+    }
+  },
+  {
+    "type": "node",
+    "id": 4055282327,
+    "lat": 58.2767874,
+    "lon": 57.7974026,
+    "tags": {
+      "bench": "yes",
+      "bus": "yes",
+      "highway": "bus_stop",
+      "name": "Ул. Коммунистическая",
+      "operator": "Чусовское АТП",
+      "public_transport": "platform",
+      "shelter": "yes"
+    }
+  },
+  {
+    "type": "node",
+    "id": 4055315299,
+    "lat": 58.2717452,
+    "lon": 57.800769,
+    "tags": {
+      "bench": "no",
+      "bus": "yes",
+      "highway": "bus_stop",
+      "name": "Сбербанк",
+      "operator": "Чусовское АТП",
+      "public_transport": "stop_position",
+      "shelter": "yes"
+    }
+  },
+  {
+    "type": "node",
+    "id": 4055425098,
+    "lat": 58.2641479,
+    "lon": 57.8175618,
+    "tags": {
+      "bus": "yes",
+      "highway": "bus_stop",
+      "name": "Детская больница",
+      "operator": "Чусовское АТП",
+      "public_transport": "stop_position"
+    }
+  },
+  {
+    "type": "node",
+    "id": 4055425099,
+    "lat": 58.2666067,
+    "lon": 57.8111475,
+    "tags": {
+      "bench": "yes",
+      "highway": "bus_stop",
+      "operator": "Чусовское АТП",
+      "shelter": "yes"
+    }
+  },
+  {
+    "type": "node",
+    "id": 4055425100,
+    "lat": 58.2717742,
+    "lon": 57.8063125,
+    "tags": {
+      "bus": "yes",
+      "highway": "bus_stop",
+      "name": "Универмаг",
+      "operator": "Чусовское АТП",
+      "public_transport": "stop_position"
+    }
+  },
+  {
+    "type": "node",
+    "id": 4055425101,
+    "lat": 58.2720052,
+    "lon": 57.8089311,
+    "tags": {
+      "highway": "bus_stop",
+      "shelter": "yes"
+    }
+  },
+  {
+    "type": "node",
+    "id": 4055525914,
+    "lat": 58.2470835,
+    "lon": 57.8297246,
+    "tags": {
+      "bench": "yes",
+      "bus": "yes",
+      "highway": "bus_stop",
+      "name": "Спортбаза \"Локомотив\"",
+      "operator": "Чусовское АТП",
+      "public_transport": "platform",
+      "shelter": "yes"
+    }
+  },
+  {
+    "type": "node",
+    "id": 4055525916,
+    "lat": 58.2408383,
+    "lon": 57.8286007,
+    "tags": {
+      "bench": "yes",
+      "bus": "yes",
+      "highway": "bus_stop",
+      "name": "Майдан",
+      "operator": "Чусовское АТП",
+      "public_transport": "platform",
+      "shelter": "yes"
+    }
+  },
+  {
+    "type": "node",
+    "id": 4055599643,
+    "lat": 58.2722366,
+    "lon": 57.8165965,
+    "tags": {
+      "bench": "yes",
+      "bus": "yes",
+      "highway": "bus_stop",
+      "name": "Юность",
+      "operator": "Чусовское АТП",
+      "public_transport": "platform",
+      "shelter": "yes"
+    }
+  },
+  {
+    "type": "node",
+    "id": 4056027277,
+    "lat": 58.278991,
+    "lon": 57.8039794,
+    "tags": {
+      "bench": "no",
+      "highway": "bus_stop",
+      "operator": "Чусовское АТП",
+      "shelter": "yes"
+    }
+  },
+  {
+    "type": "node",
+    "id": 4056027278,
+    "lat": 58.2796453,
+    "lon": 57.8097783,
+    "tags": {
+      "bench": "yes",
+      "bus": "yes",
+      "highway": "bus_stop",
+      "operator": "Чусовское АТП",
+      "public_transport": "platform",
+      "shelter": "yes"
+    }
+  },
+  {
+    "type": "node",
+    "id": 4056043305,
+    "lat": 58.2769894,
+    "lon": 57.8143503,
+    "tags": {
+      "bench": "yes",
+      "bus": "yes",
+      "highway": "bus_stop",
+      "name": "Ветеран",
+      "operator": "Чусовское АТП",
+      "public_transport": "stop_position",
+      "shelter": "yes"
+    }
+  },
+  {
+    "type": "node",
+    "id": 4056043306,
+    "lat": 58.3056023,
+    "lon": 57.8018373,
+    "tags": {
+      "bus": "yes",
+      "highway": "bus_stop",
+      "name": "Вспомогательная школа",
+      "operator": "Чусовское АТП",
+      "public_transport": "stop_position"
+    }
+  },
+  {
+    "type": "node",
+    "id": 4056043307,
+    "lat": 58.2828161,
+    "lon": 57.8132584,
+    "tags": {
+      "bench": "yes",
+      "highway": "bus_stop",
+      "name": "Мост",
+      "operator": "Чусовское АТП",
+      "shelter": "yes"
+    }
+  },
+  {
+    "type": "node",
+    "id": 4056043308,
+    "lat": 58.2754003,
+    "lon": 57.8309879,
+    "tags": {
+      "bench": "yes",
+      "highway": "bus_stop",
+      "name": "Площадь Металлургов",
+      "operator": "Чусовское АТП",
+      "shelter": "yes"
+    }
+  },
+  {
+    "type": "node",
+    "id": 4056043309,
+    "lat": 58.2786102,
+    "lon": 57.8263356,
+    "tags": {
+      "bench": "yes",
+      "highway": "bus_stop",
+      "name": "п. Металлургов",
+      "operator": "Чусовское АТП",
+      "shelter": "yes"
+    }
+  },
+  {
+    "type": "node",
+    "id": 4056043310,
+    "lat": 58.2724687,
+    "lon": 57.8291701,
+    "tags": {
+      "bus": "yes",
+      "highway": "bus_stop",
+      "name": "Транзит",
+      "operator": "Чусовское АТП",
+      "public_transport": "stop_position"
+    }
+  },
+  {
+    "type": "node",
+    "id": 6800359877,
+    "lat": 58.3231286,
+    "lon": 57.702333,
+    "tags": {
+      "highway": "bus_stop",
+      "name": "Саламатово",
+      "public_transport": "platform",
+      "shelter": "yes"
+    }
+  },
+  {
+    "type": "node",
+    "id": 12829816873,
+    "lat": 58.2643266,
+    "lon": 57.8172886,
+    "tags": {
+      "bus": "yes",
+      "highway": "bus_stop",
+      "name": "Детская больница",
+      "public_transport": "platform"
+    }
+  },
+  {
+    "type": "relation",
+    "id": 6047525,
+    "center": {
+      "lat": 58.2018472,
+      "lon": 57.8090651
+    },
+    "tags": {
+      "from": "Станция Чусовская (ж/д вокзал)",
+      "name": "№242 - Чусовой - Лысьва",
+      "network": "ru:regional",
+      "operator": "Чусовское АТП",
+      "public_transport:version": "2",
+      "ref": "242",
+      "route": "bus",
+      "to": "Лысьва",
+      "type": "route"
+    }
+  },
+  {
+    "type": "relation",
+    "id": 6048397,
+    "center": {
+      "lat": 58.2018472,
+      "lon": 57.8090651
+    },
+    "tags": {
+      "from": "Лысьва",
+      "name": "№242 - Лысьва - Чусовой",
+      "network": "ru:regional",
+      "operator": "Чусовское АТП",
+      "public_transport:version": "2",
+      "ref": "242",
+      "route": "bus",
+      "to": "Станция Чусовская (ж/д вокзал)",
+      "type": "route"
+    }
+  },
+  {
+    "type": "relation",
+    "id": 6055682,
+    "center": {
+      "lat": 58.8778487,
+      "lon": 57.3617314
+    },
+    "tags": {
+      "name": "Автобус Лысьва - Соликамск",
+      "network": "ru:regional",
+      "public_transport:version": "2",
+      "route": "bus",
+      "to": "Соликамск",
+      "type": "route"
+    }
+  },
+  {
+    "type": "relation",
+    "id": 6064383,
+    "center": {
+      "lat": 58.8778487,
+      "lon": 57.3617314
+    },
+    "tags": {
+      "from": "Соликамск",
+      "name": "Автобус Соликамск - Лысьва",
+      "network": "ru:regional",
+      "public_transport:version": "2",
+      "route": "bus",
+      "to": "Лысьва",
+      "type": "route"
+    }
+  }
+]

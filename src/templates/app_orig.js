@@ -593,19 +593,8 @@
       if (schemeModalBackdrop) {
         schemeModalBackdrop.classList.add('open');
         document.body.style.overflow = 'hidden';
-        setTimeout(() => {
-          initLeafletMap();
-          if (leafletMap) {
-            leafletMap.invalidateSize();
-          }
-          renderSchemeRouteTiles();
-          // By default, activate Route 6 if nothing selected
-          if (selectedSchemeRoute === 'none' || selectedSchemeRoute === 'all') {
-            setSchemeActiveRoute('6');
-          } else {
-            setSchemeActiveRoute(selectedSchemeRoute);
-          }
-        }, 100);
+        renderSchemeRouteTiles();
+        updateLiveMapRadar();
       }
     }
 
@@ -698,81 +687,91 @@
   // Real-time GPS-simulated movement along exact street polylines & bridge!
   // ==========================================================================
 
-  // Map nodes normalized percentages (X%, Y%) calibrated precisely on vector city map (1600x1000)
+  // Map nodes normalized percentages (X%, Y%) precisely calibrated on official Chusovoy scheme (1024x724)
   const MAP_STOPS_COORDS = {
-    // Old Town / Left Bank (West)
-    "ул.Революционная": { x: 6.88, y: 33.0 },
-    "магазин «БРАВО»": { x: 10.62, y: 32.0 },
-    "Церковь": { x: 12.5, y: 38.0 },
-    "Поликлиника": { x: 19.38, y: 35.0 },
-    "Горбольница": { x: 18.12, y: 45.0 },
-    "ул.Переездная": { x: 15.0, y: 42.0 },
-    "КДЦ": { x: 20.62, y: 40.0 },
-    "Администрация": { x: 25.62, y: 35.0 },
-    "Дом спорта": { x: 33.75, y: 35.0 },
-    "Автостанция": { x: 31.87, y: 41.0 },
-    "АС Чусовой": { x: 31.87, y: 41.0 },
-    "пл.ЧМЗ": { x: 33.12, y: 44.0 },
-    "ПлощадьЧМЗ": { x: 33.12, y: 44.0 },
-    "Французская": { x: 39.38, y: 48.0 },
-    "ул.Южная": { x: 25.62, y: 44.0 },
-    "ул.Коммунальная": { x: 27.5, y: 51.0 },
-    "РМЗ": { x: 21.88, y: 54.0 },
-    "ул.Сплавщиков": { x: 6.88, y: 61.0 },
-    "Сплавщиков": { x: 6.88, y: 61.0 },
-    "ул.Черноморская": { x: 11.88, y: 61.5 },
-    "ул.Каспийская": { x: 11.88, y: 65.0 },
-    "ул.Вильвенская": { x: 11.88, y: 69.0 },
-    "Молокозавод": { x: 14.38, y: 69.5 },
-    "Кладбище": { x: 18.12, y: 26.0 },
+    // Left bank (West of river):
+    "Горбольница": { x: 18.2, y: 45.2 },
+    "Поликлиника": { x: 19.5, y: 35.5 },
+    "ул.Переездная": { x: 14.8, y: 42.5 },
+    "Церковь": { x: 12.0, y: 38.5 },
+    "КДЦ": { x: 20.5, y: 40.5 },
+    "ул.Южная": { x: 25.8, y: 44.5 },
+    "ул.Коммунальная": { x: 27.5, y: 51.5 },
+    "РМЗ": { x: 22.0, y: 55.0 },
+    "пл.ЧМЗ": { x: 33.5, y: 44.8 },
+    "ПлощадьЧМЗ": { x: 33.5, y: 44.8 },
+    "Автостанция": { x: 32.5, y: 41.5 },
+    "АС Чусовой": { x: 32.5, y: 41.5 },
+    "Администрация": { x: 26.0, y: 35.0 },
+    "Дом спорта": { x: 34.5, y: 35.0 },
+    "ДКЖ": { x: 42.5, y: 31.5 },
+    "Французская": { x: 39.5, y: 49.0 },
+    "Заводская проходная": { x: 44.5, y: 53.0 },
+    "ул.Революционная": { x: 6.5, y: 33.5 },
+    "магазин «БРАВО»": { x: 10.5, y: 32.5 },
+    "Кладбище": { x: 18.5, y: 26.0 },
+    "ул.Сплавщиков": { x: 6.8, y: 61.5 },
+    "Сплавщиков": { x: 6.8, y: 61.5 },
+    "ул.Черноморская": { x: 12.0, y: 62.0 },
+    "ул.Каспийская": { x: 12.0, y: 65.5 },
+    "ул.Вильвенская": { x: 12.0, y: 69.5 },
+    "Молокозавод": { x: 14.5, y: 70.0 },
 
-    // Bridge
-    "Мост_Левый": { x: 44.38, y: 52.5 },
-    "Мост_Правый": { x: 51.88, y: 55.5 },
+    // The Bridge across Chusovaya river (БЕЗОПАСНЫЙ ПЕРЕЕЗД ЧЕРЕЗ МОСТ):
+    "Мост_Левый": { x: 44.5, y: 53.0 },
+    "Мост_Правый": { x: 52.0, y: 56.5 },
 
-    // North Road (Вокзал, Архиповка, Такман)
-    "ДКЖ": { x: 42.5, y: 31.0 },
-    "ул.Матросова": { x: 48.12, y: 27.5 },
-    "ж/д вокзал": { x: 53.12, y: 24.0 },
-    "Ж.Д. Вокзал": { x: 53.12, y: 24.0 },
-    "ПЧ-16": { x: 59.38, y: 22.5 },
-    "п.Архиповка": { x: 64.38, y: 22.5 },
-    "Архиповка": { x: 64.38, y: 22.5 },
-    "ГЛК Такман": { x: 73.75, y: 16.0 },
+    // Upper North road on left/top (Вокзал, Архиповка):
+    "ул.Матросова": { x: 48.5, y: 28.0 },
+    "ж/д вокзал": { x: 53.5, y: 24.5 },
+    "Ж.Д. Вокзал": { x: 53.5, y: 24.5 },
+    "ПЧ-16": { x: 59.5, y: 23.0 },
+    "п.Архиповка": { x: 64.0, y: 23.0 },
+    "Архиповка": { x: 64.0, y: 23.0 },
 
-    // New Town / Right Bank (East)
-    "пл.Металлургов": { x: 71.25, y: 43.5 },
-    "ул.Луначарского": { x: 76.25, y: 42.5 },
-    "ул.Парковая": { x: 79.38, y: 42.5 },
-    "ул.Севастопольская": { x: 83.12, y: 45.5 },
-    "ул.Победы": { x: 76.25, y: 48.5 },
-    "ул.Пермская": { x: 79.38, y: 51.5 },
-    "Юбилейная": { x: 76.88, y: 54.0 },
-    "Школа №13": { x: 84.38, y: 56.0 },
-    "школа 13": { x: 84.38, y: 56.0 },
-    "ул.Чайковского": { x: 76.25, y: 58.0 },
-    "ул.Сивкова": { x: 84.38, y: 64.5 },
-    "Преображенска": { x: 82.5, y: 73.0 },
-    "Ротонда": { x: 73.12, y: 71.0 },
-    "ул.Мира": { x: 68.12, y: 68.0 },
-    "Техникум": { x: 63.44, y: 60.0 },
-    "ул.Юности": { x: 68.12, y: 60.0 },
-    "ул.Чкалова": { x: 58.44, y: 53.5 },
-    "пер.Чунжинский": { x: 59.38, y: 48.5 },
-    "пер.Краснофлотский": { x: 59.38, y: 44.5 },
-    "пер.Кольцова": { x: 61.88, y: 36.5 },
-    "к/с Горняк": { x: 70.0, y: 37.5 },
-    "ул.Кирова": { x: 65.0, y: 34.5 },
+    // Right bank (East / New town):
+    "пер.Краснофлотский": { x: 59.5, y: 45.0 },
+    "пер.Чунжинский": { x: 59.5, y: 49.0 },
+    "ул.Чкалова": { x: 58.5, y: 54.0 },
+    "Техникум": { x: 63.5, y: 60.5 },
+    "ул.Юности": { x: 68.0, y: 60.5 },
+    "50лет ВЛКСМ": { x: 62.0, y: 73.0 },
+    "ул.Мира": { x: 68.0, y: 68.5 },
+    "Ротонда": { x: 73.5, y: 71.5 },
+    "Преображенска": { x: 82.5, y: 73.5 },
+    "ул.Сивкова": { x: 84.5, y: 65.0 },
+    "ул.Чайковского": { x: 76.5, y: 58.5 },
+    "Юбилейная": { x: 77.0, y: 54.5 },
+    "ул.Пермская": { x: 79.5, y: 52.0 },
+    "ул.Победы": { x: 76.5, y: 49.0 },
+    "пл.Металлургов": { x: 71.5, y: 44.0 },
+    "ул.Луначарского": { x: 76.5, y: 43.0 },
+    "ул.Парковая": { x: 79.5, y: 43.0 },
+    "ул.Севастопольская": { x: 83.5, y: 46.0 },
+    "Школа №13": { x: 84.5, y: 56.5 },
+    "школа 13": { x: 84.5, y: 56.5 },
+    "к/с Горняк": { x: 70.5, y: 38.0 },
+    "ул.Кирова": { x: 65.0, y: 35.0 },
+    "пер.Кольцова": { x: 62.0, y: 37.0 },
 
-    // South East (Коммунистическая, Кошково)
-    "50лет ВЛКСМ": { x: 61.88, y: 72.5 },
-    "Спорткомплекс": { x: 68.12, y: 83.0 },
-    "ул.Коммунистическая": { x: 63.44, y: 83.0 },
-    "Закурье": { x: 54.37, y: 77.0 },
-    "п.Совхозный": { x: 54.37, y: 77.0 },
-    "п.Кошково": { x: 55.62, y: 85.0 },
-    "Кошково": { x: 55.62, y: 85.0 },
-    "Мелькомбинат": { x: 55.62, y: 85.0 }
+    // Southern Right Bank (Коммунистическая, Кошково):
+    "Закурье": { x: 54.5, y: 77.5 },
+    "п.Совхозный": { x: 54.5, y: 77.5 },
+    "Кошково": { x: 55.5, y: 85.0 },
+    "п.Кошково": { x: 55.5, y: 85.0 },
+    "Мелькомбинат": { x: 55.5, y: 85.0 },
+    "Спорткомплекс": { x: 68.0, y: 83.5 },
+    "ул.Коммунистическая": { x: 63.5, y: 83.5 },
+
+    // Suburban branches:
+    "п.Всесвятская": { x: 26.5, y: 18.0 },
+    "п.Кучино": { x: 12.0, y: 84.0 },
+    "п.Мыс": { x: 56.0, y: 92.0 },
+    "п.Копально": { x: 12.0, y: 84.0 },
+    "п.Центральный": { x: 12.0, y: 84.0 },
+    "ст.Калино": { x: 56.0, y: 92.0 },
+    "с.Сёла": { x: 56.0, y: 92.0 },
+    "ГЛК Такман": { x: 64.0, y: 23.0 }
   };
 
   // Route paths definition: strictly follow road lines and Cross the Bridge!
@@ -881,64 +880,6 @@
     return { x: last.x, y: last.y, angle: 0 };
   }
 
-  // Route brand color mapping
-  const ROUTE_BRAND_COLORS = {
-    "1": "#2563eb",
-    "3": "#dc2626",
-    "4": "#059669",
-    "5": "#7c3aed",
-    "6": "#d97706",
-  // ==========================================================================
-  // LEAFLET OPENSTREETMAP INTERACTIVE BUS MAP & ROAD-SNAPPED TRACKS
-  // ==========================================================================
-  let leafletMap = null;
-  let activeTrackPolyline = null;
-  let activeBusMarkers = [];
-  let stopMarkersGroup = null;
-
-  // Real road-snapped tracks passed from generator
-  const REAL_TRACKS = window.REAL_ROUTES_TRACKS || {};
-
-  // Route brand color mapping
-  const ROUTE_BRAND_COLORS = {
-    "1": "#2563eb",
-    "3": "#dc2626",
-    "4": "#059669",
-    "5": "#7c3aed",
-    "6": "#f59e0b",
-    "7": "#0891b2",
-    "9": "#db2777",
-    "10": "#ea580c",
-    "11": "#0d9488",
-    "12": "#4f46e5",
-    "15": "#65a30d",
-    "16": "#9333ea",
-    "17": "#e11d48",
-    "22": "#0284c7"
-  };
-
-  // Initialize Leaflet Map
-  function initLeafletMap() {
-    const container = document.getElementById('leafletMapContainer');
-    if (!container || leafletMap) return;
-
-    // Chusovoy center: 58.285, 57.820, zoom 13
-    leafletMap = L.map('leafletMapContainer', {
-      center: [58.2869, 57.8148],
-      zoom: 13,
-      zoomControl: true,
-      attributionControl: false
-    });
-
-    // Dark-styled OpenStreetMap / CartoDB tiles
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-      maxZoom: 19,
-      subdomains: 'abcd'
-    }).addTo(leafletMap);
-
-    stopMarkersGroup = L.layerGroup().addTo(leafletMap);
-  }
-
   // Render right sidebar route selection tiles
   function renderSchemeRouteTiles() {
     if (!schemeRouteTilesContainer) return;
@@ -950,14 +891,12 @@
     urbanRoutes.forEach(r => {
       const isSelected = (selectedSchemeRoute === r.number);
       const activeClass = isSelected ? 'active' : '';
-      const hasTrack = Boolean(REAL_TRACKS[r.number]);
-      const color = ROUTE_BRAND_COLORS[r.number] || '#d97706';
 
       html += `
-        <button class="route-tile-btn ${activeClass} ${!hasTrack ? 'is-dev' : ''}" data-route="${r.number}" style="--tile-brand-color: ${color};">
+        <button class="route-tile-btn ${activeClass}" data-route="${r.number}">
           <div class="tile-top-row">
-            <span class="tile-number" style="border-left: 3px solid ${color};">№${r.number}</span>
-            ${hasTrack ? '<span class="tile-live-count">✓ Готов</span>' : '<span class="tile-badge-dev">В разработке</span>'}
+            <span class="tile-number">№${r.number}</span>
+            <span class="tile-live-count" id="tileCount-${r.number}"></span>
           </div>
           <div class="tile-name">${r.name}</div>
         </button>
@@ -972,6 +911,7 @@
       btn.addEventListener('click', () => {
         const routeNum = btn.dataset.route;
         if (selectedSchemeRoute === routeNum) {
+          // Toggle off: set to none (clean map)
           setSchemeActiveRoute('none');
         } else {
           setSchemeActiveRoute(routeNum);
@@ -999,77 +939,7 @@
     if (schemeFilterNoneBtn) schemeFilterNoneBtn.classList.toggle('active', routeNum === 'none');
 
     updateActiveRouteSummary();
-    drawRouteOnMap(routeNum);
     updateLiveMapRadar();
-  }
-
-  // Draw road-aligned polyline on Leaflet map
-  function drawRouteOnMap(routeNum) {
-    if (!leafletMap) return;
-
-    // Remove existing track and markers
-    if (activeTrackPolyline) {
-      leafletMap.removeLayer(activeTrackPolyline);
-      activeTrackPolyline = null;
-    }
-    if (stopMarkersGroup) {
-      stopMarkersGroup.clearLayers();
-    }
-
-    if (routeNum === 'none' || routeNum === 'all') {
-      return;
-    }
-
-    const trackData = REAL_TRACKS[routeNum];
-    if (!trackData || !trackData.points || !trackData.points.length) {
-      return;
-    }
-
-    const color = trackData.color || ROUTE_BRAND_COLORS[routeNum] || '#f59e0b';
-
-    // Outer glow line
-    const glowLine = L.polyline(trackData.points, {
-      color: color,
-      weight: 9,
-      opacity: 0.35,
-      lineCap: 'round',
-      lineJoin: 'round'
-    });
-
-    // Main sharp line
-    const mainLine = L.polyline(trackData.points, {
-      color: color,
-      weight: 5,
-      opacity: 0.95,
-      lineCap: 'round',
-      lineJoin: 'round'
-    });
-
-    activeTrackPolyline = L.featureGroup([glowLine, mainLine]).addTo(leafletMap);
-
-    // Fit map bounds to show route nicely
-    leafletMap.fitBounds(mainLine.getBounds(), { padding: [40, 40], maxZoom: 15 });
-
-    // Mark Start and End stops
-    const pts = trackData.points;
-    const startPt = pts[0];
-    const endPt = pts[pts.length - 1];
-
-    const startIcon = L.divIcon({
-      className: 'leaflet-stop-pin',
-      html: `<div style="background:#10b981; width:14px; height:14px; border-radius:50%; border:2px solid #fff; box-shadow:0 0 8px rgba(0,0,0,0.5);"></div>`,
-      iconSize: [14, 14],
-      iconAnchor: [7, 7]
-    });
-    const endIcon = L.divIcon({
-      className: 'leaflet-stop-pin',
-      html: `<div style="background:#ef4444; width:14px; height:14px; border-radius:50%; border:2px solid #fff; box-shadow:0 0 8px rgba(0,0,0,0.5);"></div>`,
-      iconSize: [14, 14],
-      iconAnchor: [7, 7]
-    });
-
-    L.marker(startPt, { icon: startIcon }).bindTooltip(`Конечная: ${trackData.name.split('—')[0].trim()}`, { direction: 'top' }).addTo(stopMarkersGroup);
-    L.marker(endPt, { icon: endIcon }).bindTooltip(`Конечная: ${trackData.name.split('—')[1] ? trackData.name.split('—')[1].trim() : ''}`, { direction: 'top' }).addTo(stopMarkersGroup);
   }
 
   // Update active route description in sidebar footer
@@ -1082,92 +952,29 @@
     }
 
     if (selectedSchemeRoute === 'all') {
-      schemeActiveRouteInfo.innerHTML = '<div class="active-route-info-card"><strong>Все городские маршруты</strong><span>Выберите конкретный маршрут для просмотра точной трассы</span></div>';
+      schemeActiveRouteInfo.innerHTML = '<div class="active-route-info-card"><strong>Все городские маршруты</strong><span>Отображаются все активные машины на линиях</span></div>';
       return;
     }
 
-    const hasTrack = Boolean(REAL_TRACKS[selectedSchemeRoute]);
     const route = allRoutes.find(r => r.number === selectedSchemeRoute);
-
-    if (!hasTrack) {
-      schemeActiveRouteInfo.innerHTML = `
-        <div class="active-route-info-card" style="border-left: 3px solid #64748b; padding-left: 0.5rem;">
-          <strong style="color: #94a3b8;">Маршрут №${selectedSchemeRoute} — В разработке</strong>
-          <span>Траектория движения в процессе выравнивания. Доступны маршруты: №6, №5.</span>
-        </div>
-      `;
-      return;
-    }
-
     if (route) {
       schemeActiveRouteInfo.innerHTML = `
-        <div class="active-route-info-card" style="border-left: 3px solid ${ROUTE_BRAND_COLORS[route.number]}; padding-left: 0.5rem;">
+        <div class="active-route-info-card">
           <strong>№${route.number} ${route.name}</strong>
           ${route.streets ? `<span>Через: ${route.streets}</span>` : ''}
-          <span style="color:#10b981; font-weight:700; margin-top:3px;">● Трасса выровнена по дорогам Чусового</span>
         </div>
       `;
     }
   }
 
-  // Calculate distance between two lat/lon points in km
-  function distanceLatLon(lat1, lon1, lat2, lon2) {
-    const p = 0.017453292519943295;
-    const a = 0.5 - Math.cos((lat2 - lat1) * p)/2 + Math.cos(lat1 * p) * Math.cos(lat2 * p) * (1 - Math.cos((lon2 - lon1) * p))/2;
-    return 12742 * Math.asin(Math.sqrt(a));
-  }
-
-  // Calculate coordinates along polyline based on progress 0..1
-  function interpolateLeafletPolyline(points, progress) {
-    if (!points || points.length < 2) return null;
-    const clampedProgress = Math.max(0, Math.min(1, progress));
-
-    const segLens = [];
-    let total = 0;
-    for (let i = 0; i < points.length - 1; i++) {
-      const d = distanceLatLon(points[i][0], points[i][1], points[i+1][0], points[i+1][1]);
-      segLens.push(d);
-      total += d;
-    }
-
-    if (total === 0) return { lat: points[0][0], lon: points[0][1], angle: 0 };
-
-    const target = clampedProgress * total;
-    let accum = 0;
-
-    for (let i = 0; i < segLens.length; i++) {
-      const sl = segLens[i];
-      if (accum + sl >= target || i === segLens.length - 1) {
-        const frac = sl > 0 ? (target - accum) / sl : 0;
-        const p1 = points[i];
-        const p2 = points[i+1];
-        const lat = p1[0] + (p2[0] - p1[0]) * frac;
-        const lon = p1[1] + (p2[1] - p1[1]) * frac;
-
-        // Angle
-        const dLon = (p2[1] - p1[1]);
-        const dLat = (p2[0] - p1[0]);
-        const angle = Math.round(Math.atan2(dLon, dLat) * 180 / Math.PI);
-
-        return { lat, lon, angle };
-      }
-      accum += sl;
-    }
-
-    const last = points[points.length - 1];
-    return { lat: last[0], lon: last[1], angle: 0 };
-  }
-
-  // Live bus movement on Leaflet map
+  // Calculate current live bus positions based on schedule
   function updateLiveMapRadar() {
-    if (!leafletMap) return;
+    const overlay = document.getElementById('busesLiveOverlay');
+    if (!overlay || !allRoutes.length) return;
 
-    // Clear previous bus markers
-    activeBusMarkers.forEach(m => leafletMap.removeLayer(m));
-    activeBusMarkers = [];
-
-    // If 'none' or route without track, don't show buses
-    if (selectedSchemeRoute === 'none' || (selectedSchemeRoute !== 'all' && !REAL_TRACKS[selectedSchemeRoute])) {
+    // If 'none' selected, clear map and return
+    if (selectedSchemeRoute === 'none') {
+      overlay.innerHTML = '';
       return;
     }
 
@@ -1175,14 +982,16 @@
     const nowMinutes = now.getHours() * 60 + now.getMinutes() + now.getSeconds() / 60;
     const weekendToday = isWeekend(now);
 
-    const routesToCheck = (selectedSchemeRoute === 'all') ? Object.keys(REAL_TRACKS) : [selectedSchemeRoute];
+    const activeBuses = [];
 
-    routesToCheck.forEach(rNum => {
-      const trackData = REAL_TRACKS[rNum];
-      if (!trackData) return;
+    allRoutes.forEach(route => {
+      // На интерактивной схеме города показываем только городские автобусы
+      if (route.category === 'suburban') return;
 
-      const route = allRoutes.find(r => r.number === rNum);
-      if (!route) return;
+      // Filter: if specific route is selected, skip all others!
+      if (selectedSchemeRoute !== 'all' && selectedSchemeRoute !== route.number) {
+        return;
+      }
 
       route.sections.forEach(sec => {
         if (sec.type === 'weekday' && weekendToday) return;
@@ -1191,64 +1000,131 @@
         const stops = sec.stops;
         if (!stops || stops.length < 2) return;
 
-        sec.schedule.forEach(trip => {
-          let startMin = null;
-          let tStart = null;
+        sec.schedule.forEach((trip, tripIndex) => {
+          // Find first stop with valid departure time
+          let startStop = null;
+          let tStartObj = null;
+          let endStop = null;
+          let tEndObj = null;
+
           for (let s of stops) {
             if (trip[s] && trip[s].time) {
-              tStart = trip[s].time;
-              const [h, m] = tStart.split(':').map(Number);
-              startMin = h * 60 + m;
-              break;
+              if (!startStop) {
+                startStop = s;
+                tStartObj = trip[s];
+              }
+              endStop = s;
+              tEndObj = trip[s];
             }
           }
 
-          if (startMin === null) return;
-          const endMin = startMin + 26; // trip duration 26 mins
+          if (!startStop || !tStartObj || !tStartObj.time) return;
 
-          // Check if bus is en route (or show demo position if no bus right this minute)
-          let progress = 0.5; // fallback demo position along track
-          let isLive = false;
+          const [sh, sm] = tStartObj.time.split(':').map(Number);
+          const startMin = sh * 60 + sm;
 
-          if (nowMinutes >= startMin && nowMinutes <= endMin) {
-            progress = (nowMinutes - startMin) / (endMin - startMin);
-            isLive = true;
+          // Trip duration estimation
+          let endMin = startMin + 25;
+          if (tEndObj && tEndObj.time && endStop !== startStop) {
+            const [eh, em] = tEndObj.time.split(':').map(Number);
+            let calculatedEnd = eh * 60 + em;
+            if (calculatedEnd < startMin) calculatedEnd += 1440;
+            if (calculatedEnd > startMin) endMin = calculatedEnd;
           }
 
-          // If looking at specific route, always show bus either at live time or current theoretical position
-          const busPos = interpolateLeafletPolyline(trackData.points, progress);
-          if (busPos) {
-            const busColor = trackData.color || ROUTE_BRAND_COLORS[rNum] || '#f59e0b';
-            const iconHtml = `
-              <div class="leaflet-bus-marker-wrap">
-                <div class="leaflet-bus-badge" style="background: ${busColor};">№ ${rNum}</div>
-                <div class="leaflet-bus-svg-wrap" style="transform: rotate(${busPos.angle - 90}deg);">
-                  <svg width="32" height="20" viewBox="0 0 50 30" fill="none">
-                    <rect x="4" y="5" width="40" height="20" rx="4" fill="${busColor}" stroke="#fff" stroke-width="1.5" />
-                    <rect x="10" y="3" width="28" height="4" rx="1.5" fill="#ffffff" />
-                    <rect x="8" y="9" width="30" height="7" rx="1.5" fill="#1e252d" />
-                    <circle cx="43" cy="15" r="3" fill="#fef08a" />
-                  </svg>
-                </div>
-              </div>
-            `;
+          // Check if bus is actively en route right now (with 1 min margin)
+          if (nowMinutes >= startMin && nowMinutes <= endMin) {
+            const progress = Math.max(0, Math.min(1, (nowMinutes - startMin) / Math.max(1, endMin - startMin)));
 
-            const busIcon = L.divIcon({
-              className: 'leaflet-bus-icon',
-              html: iconHtml,
-              iconSize: [40, 40],
-              iconAnchor: [20, 20]
+            // Construct exact waypoint coordinates for this route
+            const baseRoutePath = ROUTE_PATHS[route.number];
+            let pathSequence = [];
+
+            if (baseRoutePath && baseRoutePath.length > 0) {
+              pathSequence = [...baseRoutePath];
+
+              // Direction handling: if schedule sequence indicates reverse direction, reverse waypoints
+              const firstBase = baseRoutePath[0];
+              const lastBase = baseRoutePath[baseRoutePath.length - 1];
+
+              // Check if departure is closer to lastBase than firstBase
+              const isReverse = (startStop.includes(lastBase) || lastBase.includes(startStop)) &&
+                                !(startStop.includes(firstBase) || firstBase.includes(startStop));
+
+              if (isReverse) {
+                pathSequence.reverse();
+              }
+            } else {
+              pathSequence = [...stops];
+            }
+
+            // Convert names to coordinates
+            const validCoords = [];
+            pathSequence.forEach(st => {
+              const c = getStopCoord(st);
+              if (c) validCoords.push(c);
             });
 
-            const marker = L.marker([busPos.lat, busPos.lon], { icon: busIcon })
-              .bindTooltip(`<strong>Маршрут №${rNum}</strong><br>${isLive ? 'В рейсе • Отпр: ' + tStart : 'На линии'}`, { direction: 'top' })
-              .addTo(leafletMap);
-
-            activeBusMarkers.push(marker);
+            if (validCoords.length >= 2) {
+              const pos = interpolateAlongPolyline(validCoords, progress);
+              if (pos) {
+                activeBuses.push({
+                  id: `bus-${route.number}-${tripIndex}-${startStop}`,
+                  num: route.number,
+                  name: route.name,
+                  from: startStop,
+                  to: endStop || stops[stops.length - 1],
+                  x: Number(pos.x.toFixed(2)),
+                  y: Number(pos.y.toFixed(2)),
+                  angle: pos.angle,
+                  startTime: tStartObj.time,
+                  progressPct: Math.round(progress * 100),
+                  note: tStartObj.note || (tEndObj ? tEndObj.note : '')
+                });
+              }
+            }
           }
         });
       });
     });
+
+    if (countBadge) {
+      countBadge.textContent = activeBuses.length;
+    }
+
+    // Render SVG Live Radar Bus Icons on top of Map
+    let overlayHtml = '';
+    activeBuses.forEach(b => {
+      overlayHtml += `
+        <div class="live-map-bus" id="${b.id}" style="left: ${b.x}%; top: ${b.y}%;" title="Маршрут №${b.num}">
+          <div class="map-bus-tooltip">
+            <strong>№${b.num} ${b.from} ➔ ${b.to}</strong><br>
+            Отпр: ${b.startTime} • В пути ${b.progressPct}% ${b.note ? '• ' + b.note : ''}
+          </div>
+          <div class="map-bus-pin">
+            <div class="map-bus-badge">№ ${b.num}</div>
+            <div class="map-bus-vehicle" style="transform: rotate(${b.angle}deg);">
+              <svg class="map-bus-svg" viewBox="0 0 50 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <!-- Glowing Headlights Cone Projection in Dark Mode -->
+                <polygon class="map-bus-headlight-beam" points="44,15 75,5 75,25" fill="url(#headlightRay)" />
+                <!-- Bus Chassis in Permian Red Livery -->
+                <rect x="4" y="5" width="40" height="20" rx="4" fill="#cf2323" stroke="#fff" stroke-width="1" />
+                <!-- White Aerodynamic Roof -->
+                <rect x="10" y="3" width="28" height="4" rx="1.5" fill="#ffffff" />
+                <!-- Dark Tinted Windows -->
+                <rect x="8" y="9" width="30" height="7" rx="1.5" fill="#1e252d" />
+                <!-- Headlight Lamp with Glowing effect -->
+                <circle cx="43" cy="15" r="2.5" fill="#fef08a" class="map-bus-lamp-glow" />
+                <!-- Rear Light -->
+                <circle cx="5" cy="15" r="1.5" fill="#ef4444" />
+              </svg>
+            </div>
+          </div>
+        </div>
+      `;
+    });
+
+    overlay.innerHTML = overlayHtml;
   }
 
   // Check and display fallback banner if offline snapshot is in use
