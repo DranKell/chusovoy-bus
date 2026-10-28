@@ -1644,20 +1644,13 @@ body {
   color: var(--accent-primary);
 }
 
-/* Visitor counter badge (в шапке) */
-.visitor-counter-link {
-  display: inline-flex;
-  align-items: center;
+/* Счётчик посетителей в футере */
+.footer-counter {
+  margin-top: 0.85rem;
 }
 
-.visitor-counter-link img {
-  height: 20px;
-  border-radius: 4px;
-  transition: opacity 0.15s ease;
-}
-
-.visitor-counter-link:hover img {
-  opacity: 0.8;
+.footer-counter img {
+  border-radius: 3px;
 }
 
 /* Mobile Adjustments */
