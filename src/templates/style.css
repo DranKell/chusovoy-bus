@@ -1249,6 +1249,14 @@ body {
   color: var(--tag-suburban-text);
 }
 
+.tag-onroute {
+  background: color-mix(in srgb, var(--accent-secondary) 18%, transparent);
+  color: var(--accent-secondary);
+  border: 1px solid color-mix(in srgb, var(--accent-secondary) 40%, transparent);
+  text-transform: none;
+  letter-spacing: 0;
+}
+
 .fav-btn {
   background: transparent;
   border: none;

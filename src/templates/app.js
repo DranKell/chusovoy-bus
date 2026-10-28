@@ -152,6 +152,49 @@
     return getTripStatus(route).next[0] || null;
   }
 
+  // Estimate total buses assigned to a route:
+  // максимальное число ОДНОВРЕМЕННО идущих рейсов за день по расписанию
+  function estimateFleet(route) {
+    const events = [];
+    let tripsCounted = 0;
+
+    route.sections.forEach(sec => {
+      sec.schedule.forEach(trip => {
+        let startObj = null;
+        let endObj = null;
+        sec.stops.forEach(stop => {
+          const tObj = trip[stop];
+          if (!tObj || !tObj.time) return;
+          if (!startObj) startObj = tObj;
+          endObj = tObj;
+        });
+        if (!startObj || !startObj.time || !endObj || !endObj.time) return;
+
+        const startDate = parseTimeToToday(startObj.time);
+        const endDate = parseTimeToToday(endObj.time);
+        if (!startDate || !endDate || endDate <= startDate) return;
+
+        events.push({ t: startDate.getTime(), d: 1 });
+        events.push({ t: endDate.getTime(), d: -1 });
+        tripsCounted++;
+      });
+    });
+
+    if (!tripsCounted) return 0;
+
+    // Sweep line: старты в моменте t должны учитываться раньше финишей
+    events.sort((a, b) => a.t - b.t || b.d - a.d);
+
+    let current = 0;
+    let maxOverlap = 0;
+    events.forEach(ev => {
+      current += ev.d;
+      if (current > maxOverlap) maxOverlap = current;
+    });
+
+    return maxOverlap;
+  }
+
   // Update Realistic Electronic LED Board (Общее информационное табло Чусового)
   function updateLedScoreboard() {
     const ledTrackEl = document.getElementById('ledTickerText');
@@ -383,6 +426,18 @@
         `;
       }
 
+      // Оценка парка маршрута по расписанию
+      const fleetEstimate = estimateFleet(route);
+      const onRouteCount = tripStatus.onRoute.length;
+      let busCountTagHtml = '';
+      if (onRouteCount > 0) {
+        busCountTagHtml = `
+          <span class="tag tag-onroute" title="Сейчас на линии по расписанию: ${onRouteCount}. За день на маршруте задействовано до ${fleetEstimate} автобусов (максимальное число одновременных рейсов).">
+            🚌 ${onRouteCount} на линии
+          </span>
+        `;
+      }
+
       html += `
         <div class="route-card" data-route-num="${route.number}">
           <div>
@@ -392,6 +447,7 @@
                 <span class="tag ${isSuburban ? 'tag-suburban' : 'tag-urban'}">
                   ${isSuburban ? 'Пригород' : 'Городской'}
                 </span>
+                ${busCountTagHtml}
                 <button class="fav-btn ${isFav ? 'is-fav' : ''}" data-fav-num="${route.number}" title="${isFav ? 'Удалить из избранного' : 'Добавить в избранное'}">
                   ${isFav ? '★' : '☆'}
                 </button>
