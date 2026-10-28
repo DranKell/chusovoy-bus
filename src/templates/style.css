@@ -1624,6 +1624,23 @@ body {
   color: var(--accent-primary);
 }
 
+/* Visitor counter badge */
+.visitor-counter-link {
+  display: inline-flex;
+  align-items: center;
+}
+
+.visitor-counter-link img {
+  height: 20px;
+  border-radius: 4px;
+  opacity: 0.9;
+  transition: opacity 0.15s ease;
+}
+
+.visitor-counter-link:hover img {
+  opacity: 1;
+}
+
 /* Mobile Adjustments */
 @media (max-width: 640px) {
   .site-header {
