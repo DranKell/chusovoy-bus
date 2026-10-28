@@ -1484,12 +1484,9 @@
           }
         });
 
-        // Determine buses to show: active ones, or show 2 demonstration buses (outbound + inbound) if off-peak
-        let busesToShow = activeBuses;
-        if (busesToShow.length === 0) {
-          if (nearestOutbound) busesToShow.push(nearestOutbound);
-          if (nearestInbound) busesToShow.push(nearestInbound);
-        }
+        // Determine buses to show: только рейсы, которые прямо сейчас в пути.
+        // После последнего рейса схема остаётся чистой — никаких плановых призраков.
+        const busesToShow = activeBuses;
 
         // Split indices for each route: where outbound ends (terminal) and inbound starts
         const ROUTE_TERMINAL_SPLIT = {
