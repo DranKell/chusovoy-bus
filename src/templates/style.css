@@ -1644,6 +1644,17 @@ body {
   color: var(--accent-primary);
 }
 
+/* Пасхалка на слове «Автобусы» (ссылка в заголовке) */
+.brand-text h1 .easter-egg {
+  color: inherit;
+  text-decoration: none;
+  transition: opacity 0.15s ease;
+}
+
+.brand-text h1 .easter-egg:hover {
+  opacity: 0.72;
+}
+
 /* Счётчик посетителей в футере */
 .footer-counter {
   margin-top: 0.85rem;
