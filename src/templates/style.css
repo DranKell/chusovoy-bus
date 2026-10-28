@@ -1308,6 +1308,18 @@ body {
   color: var(--text-muted);
 }
 
+.next-bus-indicator.on-route {
+  color: var(--accent-secondary);
+  opacity: 0.9;
+}
+
+.next-bus-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
 .next-bus-indicator.has-bus {
   color: var(--accent-secondary);
 }

@@ -77,55 +77,79 @@
     return d;
   }
 
-  // Calculate nearest departure for a route
-  function getNextDeparture(route) {
+  // Collect trip status for a route:
+  //   onRoute - trips already started today and still en route (по расписанию)
+  //   next    - ближайшие будущие отправления (до 2)
+  function getTripStatus(route) {
     const now = getNow();
-    let bestTrip = null;
-    let minDiffMs = Infinity;
-
-    // Determine relevant sections based on today (weekend vs weekday)
     const weekendToday = isWeekend(now);
+    const onRoute = [];
+    const upcoming = [];
 
     route.sections.forEach(sec => {
       // Check if section matches today
       if (sec.type === 'weekday' && weekendToday) return;
       if (sec.type === 'weekend' && !weekendToday) return;
 
-      const firstStop = sec.stops[0];
-      if (!firstStop) return;
-
       sec.schedule.forEach((trip, tripIdx) => {
-        const timeObj = trip[firstStop];
-        if (!timeObj || !timeObj.time) return;
+        // Trip starts at first scheduled stop, ends at last stop with a time
+        let startObj = null;
+        let endObj = null;
+        sec.stops.forEach(stop => {
+          const tObj = trip[stop];
+          if (!tObj || !tObj.time) return;
+          if (!startObj) startObj = tObj;
+          endObj = tObj;
+        });
+        if (!startObj || !startObj.time) return;
 
         // If note restricts day (e.g., 'Сб.', 'Пн.-Пт.')
-        if (timeObj.note) {
-          const note = timeObj.note.toLowerCase();
+        if (startObj.note) {
+          const note = startObj.note.toLowerCase();
           if (note.includes('сб') && now.getDay() !== 6) return;
           if (note.includes('вс') && now.getDay() !== 0) return;
           if (note.includes('пн.-пт.') && weekendToday) return;
         }
 
-        const tripDate = parseTimeToToday(timeObj.time);
-        if (!tripDate) return;
+        const startDate = parseTimeToToday(startObj.time);
+        if (!startDate) return;
 
-        const diffMs = tripDate.getTime() - now.getTime();
-        // Look for departures today within next hours
-        if (diffMs > 0 && diffMs < minDiffMs) {
-          minDiffMs = diffMs;
-          bestTrip = {
-            time: timeObj.time,
-            stop: firstStop,
-            diffMinutes: Math.round(diffMs / 60000),
-            note: timeObj.note,
-            sectionTitle: sec.title,
-            tripIdx: tripIdx
-          };
+        const diffMs = startDate.getTime() - now.getTime();
+        const info = {
+          time: startObj.time,
+          stop: sec.stops[0],
+          diffMinutes: Math.round(diffMs / 60000),
+          note: startObj.note,
+          sectionTitle: sec.title,
+          tripIdx: tripIdx
+        };
+
+        if (diffMs > 0) {
+          // Future departure
+          upcoming.push(info);
+        } else if (endObj && endObj.time) {
+          // Started earlier: is it still on the route (по расписанию)?
+          const endDate = parseTimeToToday(endObj.time);
+          if (endDate && endDate.getTime() > now.getTime()) {
+            info.inTransit = true;
+            info.endTime = endObj.time;
+            info.remainingMinutes = Math.round((endDate.getTime() - now.getTime()) / 60000);
+            onRoute.push(info);
+          }
         }
       });
     });
 
-    return bestTrip;
+    upcoming.sort((a, b) => a.diffMinutes - b.diffMinutes);
+    return {
+      onRoute: onRoute,
+      next: upcoming.slice(0, 2)
+    };
+  }
+
+  // Calculate nearest departure for a route (compat wrapper)
+  function getNextDeparture(route) {
+    return getTripStatus(route).next[0] || null;
   }
 
   // Update Realistic Electronic LED Board (Общее информационное табло Чусового)
@@ -318,9 +342,22 @@
     filtered.forEach(route => {
       const isFav = favorites.includes(route.number);
       const isSuburban = route.category === 'suburban';
-      const nextBus = getNextDeparture(route);
+      const tripStatus = getTripStatus(route);
+      const nextBus = tripStatus.next[0] || null;
 
       let nextBusHtml = '';
+      if (tripStatus.onRoute.length > 0) {
+        // Автобус(ы), который уже выехал с конечной и ещё на линии (по расписанию)
+        tripStatus.onRoute.forEach(onTrip => {
+          nextBusHtml += `
+          <div class="next-bus-indicator has-bus on-route">
+            <span>🚌</span>
+            <span class="next-time-value">${onTrip.time}</span>
+            <span style="font-size:0.75rem;opacity:0.85;">в пути${onTrip.endTime ? `, до конечной ~${onTrip.endTime}` : ''}</span>
+          </div>
+        `;
+        });
+      }
       if (nextBus) {
         let diffStr = '';
         if (nextBus.diffMinutes < 60) {
@@ -330,14 +367,15 @@
           const m = nextBus.diffMinutes % 60;
           diffStr = `через ${h} ч ${m} мин`;
         }
-        nextBusHtml = `
+        nextBusHtml += `
           <div class="next-bus-indicator has-bus" title="Отправление: ${nextBus.stop}">
             <span>⏰ Рейс в</span>
             <span class="next-time-value">${nextBus.time}</span>
             <span style="font-size:0.75rem;opacity:0.85;">(${diffStr})</span>
           </div>
         `;
-      } else {
+      }
+      if (!nextBus && tripStatus.onRoute.length === 0) {
         nextBusHtml = `
           <div class="next-bus-indicator">
             <span>🌙 Рейсов нет</span>
@@ -367,7 +405,7 @@
           </div>
 
           <div class="card-footer">
-            ${nextBusHtml}
+            <div class="next-bus-stack">${nextBusHtml}</div>
             <span class="view-schedule-link">Расписание →</span>
           </div>
         </div>
@@ -421,12 +459,24 @@
     const sections = activeModalRoute.sections;
 
     // Highlight next bus banner
-    const nextBus = getNextDeparture(activeModalRoute);
+    const tripStatus = getTripStatus(activeModalRoute);
+    const nextBus = tripStatus.next[0] || null;
+    let bannerHtml = '';
+    if (tripStatus.onRoute.length > 0) {
+      tripStatus.onRoute.forEach(onTrip => {
+        bannerHtml += `
+        <span>🚌 <strong>${onTrip.time}</strong> уже в пути${onTrip.endTime ? `, завершение ~${onTrip.endTime}` : ''}</span>
+      `;
+      });
+    }
     if (nextBus) {
-      modalNextBanner.innerHTML = `
+      bannerHtml += `
         <span>⏰ <strong>Ближайший рейс:</strong> ${nextBus.time} (${nextBus.stop})</span>
         <span>отправление через ${nextBus.diffMinutes} мин</span>
       `;
+    }
+    if (bannerHtml) {
+      modalNextBanner.innerHTML = bannerHtml;
       modalNextBanner.style.display = 'flex';
     } else {
       modalNextBanner.style.display = 'none';
